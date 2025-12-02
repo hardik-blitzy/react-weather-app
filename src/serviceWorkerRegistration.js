@@ -1,3 +1,27 @@
+/**
+ * serviceWorkerRegistration.js
+ * Service Worker registration and lifecycle management.
+ *
+ * @module serviceWorkerRegistration
+ * @description Handles the registration, update detection, and unregistration
+ * of the service worker for PWA functionality. Key behaviors:
+ *
+ * - Production-only registration (skipped in development)
+ * - Localhost detection for development debugging
+ * - Automatic update detection with configurable callbacks
+ * - Origin validation to prevent CDN-served asset conflicts
+ *
+ * Registration Flow:
+ * 1. Checks if running in production and SW is supported
+ * 2. Validates PUBLIC_URL origin matches page origin
+ * 3. On localhost: validates SW exists before registering
+ * 4. On production: directly registers SW
+ * 5. Monitors for updates and triggers callbacks
+ *
+ * @see ./service-worker.js - The actual service worker implementation
+ * @see https://cra.link/PWA - Create React App PWA documentation
+ */
+
 // This optional code is used to register a service worker.
 // register() is not called by default.
 
@@ -10,6 +34,7 @@
 // To learn more about the benefits of this model and instructions on how to
 // opt-in, read https://cra.link/PWA
 
+// Localhost detection: supports localhost, IPv6 [::1], and IPv4 127.x.x.x addresses
 const isLocalhost = Boolean(
   window.location.hostname === 'localhost' ||
     // [::1] is the IPv6 localhost address.
@@ -18,6 +43,23 @@ const isLocalhost = Boolean(
     window.location.hostname.match(/^127(?:\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}$/)
 );
 
+/**
+ * Registers the service worker with the provided configuration.
+ * Only registers in production environment.
+ *
+ * @param {Object} [config] - Registration configuration options
+ * @param {string} [config.scope] - Service worker scope path
+ * @param {Object} [config.registerOptions] - Navigator.serviceWorker.register options
+ * @param {Function} [config.onSuccess] - Callback when SW is successfully installed
+ * @param {Function} [config.onUpdate] - Callback when a new SW version is available
+ * @returns {void}
+ *
+ * @example
+ * register({
+ *   onSuccess: (registration) => console.log('SW registered'),
+ *   onUpdate: (registration) => console.log('Update available')
+ * });
+ */
 export function register(config) {
   if (process.env.NODE_ENV === 'production' && 'serviceWorker' in navigator) {
     // The URL constructor is available in all browsers that support SW.
@@ -53,6 +95,14 @@ export function register(config) {
   }
 }
 
+/**
+ * Internal function to register a valid service worker.
+ * Handles the registration lifecycle and update detection.
+ *
+ * @private
+ * @param {string} swUrl - URL of the service worker script
+ * @param {Object} [config] - Configuration with callback options
+ */
 function registerValidSW(swUrl, config) {
   navigator.serviceWorker
     .register(swUrl)
@@ -97,6 +147,14 @@ function registerValidSW(swUrl, config) {
     });
 }
 
+/**
+ * Validates the service worker script exists and is JavaScript.
+ * Used on localhost to ensure we're not caching an old/invalid SW.
+ *
+ * @private
+ * @param {string} swUrl - URL of the service worker script
+ * @param {Object} [config] - Configuration with callback options
+ */
 function checkValidServiceWorker(swUrl, config) {
   // Check if the service worker can be found. If it can't reload the page.
   fetch(swUrl, {
@@ -125,6 +183,17 @@ function checkValidServiceWorker(swUrl, config) {
     });
 }
 
+/**
+ * Unregisters the active service worker.
+ * Useful for debugging or when disabling offline functionality.
+ *
+ * @returns {void}
+ *
+ * @example
+ * // Disable service worker
+ * import { unregister } from './serviceWorkerRegistration';
+ * unregister();
+ */
 export function unregister() {
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.ready
