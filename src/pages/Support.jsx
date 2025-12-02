@@ -1,21 +1,72 @@
+/**
+ * Support.jsx
+ * Support and about page component.
+ *
+ * @module Support
+ * @description Displays developer information, GitHub links,
+ * and ways to support the project. Includes sponsor information
+ * and links to the project repository.
+ *
+ * Route: /support
+ *
+ * Features:
+ * - Developer biography and introduction
+ * - GitHub profile link for sponsorship
+ * - Project repository link for contributions
+ * - Navigation back to weather page
+ *
+ * Note: The exported component is named 'Settings' but functions
+ * as the Support page. This is an existing naming inconsistency.
+ *
+ * @see ../App.js - Router configuration
+ */
+
 import React, { useState } from "react";
 import Footer from "../components/footer";
 import navigate from "../inc/scripts/utilities";
 import Button from "../components/button";
 import Spinner from "../components/spinner";
+
+/**
+ * Support page React functional component.
+ * Displays developer info and project support options.
+ *
+ * Note: Exported as 'Settings' due to existing code pattern,
+ * but serves as the Support page in routing.
+ *
+ * @returns {JSX.Element} Support page with developer info and GitHub links
+ */
 const Settings = () => {
+  /**
+   * Navigates user back to the main weather page.
+   *
+   * @returns {void}
+   */
   const navigateHome = () => {
     navigate("./weather");
   };
 
+  /**
+   * Opens the project's GitHub repository in a new context.
+   * Links to: https://github.com/Adedoyin-Emmanuel/react-weather-app
+   *
+   * @returns {void}
+   */
   const navigateToProject = ()=>{
     navigate("https://github.com/Adedoyin-Emmanuel/react-weather-app");
   }
 
+  /**
+   * Opens the developer's GitHub profile in a new context.
+   * Links to: https://github.com/Adedoyin-Emmanuel
+   *
+   * @returns {void}
+   */
   const navigateToGithub = () =>{
     navigate("https://github.com/Adedoyin-Emmanuel");
   }
 
+  // Note: defaultLocation state is unused - consider removing in future cleanup
   const [defaultLocation, setDefaultLocation] = useState("");
   return (
     <React.Fragment>
