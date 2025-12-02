@@ -1,3 +1,36 @@
+/**
+ * Settings.jsx
+ * Application settings and preferences page.
+ *
+ * @module Settings
+ * @description Allows users to configure application preferences
+ * including location, temperature units, and app reset options.
+ * Uses settings module functions for persistence operations.
+ *
+ * Route: /settings
+ *
+ * Features:
+ * - Default location update
+ * - Temperature unit selection (Celsius/Kelvin/Fahrenheit)
+ * - Location weather tracking toggle
+ * - Factory reset option
+ *
+ * localStorage keys used:
+ * - USER_DEFAULT_LOCATION: User's preferred location
+ * - TRACK_SAVED_LOCATION_WEATHER: Auto-track toggle (boolean)
+ * - WEATHER_UNIT: Temperature unit preference
+ *
+ * Settings Functions Used (from ../backend/settings):
+ * - saveLocation(e): Saves default location from form
+ * - getDefaultLocation(): Gets current saved location
+ * - changeWeatherUnit(e): Updates temperature unit
+ * - trackSavedLocationWeather(): Toggles location tracking
+ * - restoreFactorySettings(): Clears all data and resets app
+ *
+ * @see ../backend/settings - Settings persistence functions
+ * @see ../backend/app_backend - Database (db) for direct reads
+ */
+
 import React, { useState } from "react";
 import Footer from "../components/footer";
 import navigate from "../inc/scripts/utilities";
@@ -5,16 +38,32 @@ import Button from "../components/button";
 import Spinner from "../components/spinner";
 import { db } from "../backend/app_backend";
 import * as settings from "./../backend/settings";
+
+/**
+ * Settings page React functional component.
+ * Renders settings form with location, unit, and reset options.
+ *
+ * @returns {JSX.Element} Settings page with preferences form
+ */
 const Settings = () => {
+	/**
+	 * Navigates user back to the main weather page.
+	 * Called when user clicks the back arrow.
+	 *
+	 * @returns {void}
+	 */
 	const navigateHome = () => {
 		navigate("./weather");
 	};
 
+	// Initialize state with saved location from localStorage
 	const [defaultLocation, setDefaultLocation] = useState(
 		settings.getDefaultLocation()
 	);
 	const [weatherUnit, setWeatherUnit] = useState();
-	//database returns a string
+
+	// Convert localStorage string "true"/"false" to boolean
+	// db.get() returns string, but checkbox needs boolean defaultChecked
 	let trackedLocation = db.get("TRACK_SAVED_LOCATION_WEATHER");
 	let trackedLocationLegit = trackedLocation == "true" ? true : false;
 
@@ -52,6 +101,7 @@ const Settings = () => {
 								className="brand-small-text py-3">
 								Update your default location
 							</label>
+							{/* Controlled input bound to defaultLocation state */}
 							<input
 								type="text"
 								name="defaultLocation"
@@ -79,6 +129,7 @@ const Settings = () => {
 								select your default weather unit
 							</label>
 
+							{/* Weather unit dropdown - values map to API unit parameters */}
 							<div className="mb-3">
 								<select className="form-select form-select my-2" name="weatherUnit" id="weatherUnitContainer" value={weatherUnit} onChange={(e)=>setWeatherUnit(e.target.value)}>
 									<option defaultValue="SELECT" value={0} className="text-capitalize">
@@ -124,6 +175,7 @@ const Settings = () => {
 								</p>
 							</section>
 
+							{/* Toggle switch for automatic location weather tracking */}
 							<section className="form-check form-switch my-3">
 								<input
 									className="form-check-input"
