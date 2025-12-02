@@ -1,6 +1,56 @@
+/**
+ * futureWeatherComponent.jsx
+ * Future weather display component.
+ *
+ * @module FutureWeatherComponent
+ * @description Displays a clickable weather card showing time,
+ * weather icon, and temperature. Used in forecast strips and
+ * weather previews. Similar to ForecastDailyWeatherComponent
+ * but includes role="button" for accessibility.
+ *
+ * Styling:
+ * - Uses Bootstrap utility classes (d-flex, align-items-center, etc.)
+ * - Inline overscroll styles for horizontal scroll behavior
+ * - Fixed image dimensions (40x50 pixels)
+ * - Brand utility classes (brand-bg-white, brand-small-text, etc.)
+ * - shadow-sm for subtle elevation
+ *
+ * Accessibility:
+ * - role="button" on clickable section
+ * - onClick handler for interaction
+ *
+ * DOM Structure:
+ * - section.future-weather-container with role="button" (outer card)
+ * - section.weather-wrapper (content wrapper)
+ * - p.brand-small-text-2 (time display)
+ * - section.weather-icon-section > img (weather icon, 40x50)
+ * - p.brand-small-text (temperature with degree symbol)
+ *
+ * @example
+ * import FutureWeatherComponent from '../components/futureWeatherComponent';
+ * // In JSX:
+ * <FutureWeatherComponent
+ *   time="3 PM"
+ *   icon="/assets/static/sunny.svg"
+ *   weatherUnit="25"
+ *   onClick={() => showWeatherDetails()}
+ * />
+ */
 import React from "react";
 
+/**
+ * FutureWeatherComponent React functional component.
+ * Renders a clickable weather preview card.
+ *
+ * @param {Object} props - Component properties
+ * @param {Function} [props.onClick] - Click handler for card interaction
+ * @param {string} props.time - Time display string (e.g., "3 PM", "12pm")
+ * @param {string} props.icon - Path to weather icon image
+ * @param {string} props.weatherUnit - Temperature value (without degree symbol)
+ * @returns {JSX.Element} Clickable future weather card
+ */
 const FutureWeatherComponent = props =>{
+   // Inline styles to hide scrollbar and enable horizontal scroll
    const customStyle = {
     "overscrollX":"scroll",
     "scrollbarWidth":"none"
