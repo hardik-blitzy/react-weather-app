@@ -1,15 +1,70 @@
+/**
+ * footerNav.jsx
+ * Navigation footer bar component.
+ *
+ * @module FooterNav
+ * @description Renders a fixed footer navigation bar with four
+ * sections: App (home), Search, Settings, and Support. Each section
+ * contains an SVG icon and text label.
+ *
+ * Navigation Handlers:
+ * - App: Calls navigate("weather") - goes to main weather page
+ * - Search: Delegates to props.onClick for custom handling
+ * - Settings: Calls navigate("settings") - goes to settings page
+ * - Support: Calls navigate("support") - goes to support page
+ *
+ * Accessibility Notes:
+ * - Uses role="button" on clickable sections
+ * - Lacks keyboard handlers (onClick only)
+ * - Lacks ARIA labels for screen readers
+ * - SVG icons have fixed fill="#ffffff" (white)
+ *
+ * Dependencies:
+ * - ../inc/scripts/utilities - navigate function for page transitions
+ *
+ * @example
+ * import FooterNav from '../components/footerNav';
+ * // In JSX:
+ * <FooterNav onClick={handleSearchClick} />
+ */
 import React from "react";
 import navigate from "./../inc/scripts/utilities";
 
+/**
+ * FooterNav React functional component.
+ * Renders a navigation bar with App, Search, Settings, Support links.
+ *
+ * @param {Object} props - Component properties
+ * @param {Function} [props.onClick] - Click handler for the Search button
+ * @returns {JSX.Element} Footer navigation bar
+ */
 const FooterNav = (props) => {
+  /**
+   * Navigates to the main weather/app page.
+   * Called when user clicks the "App" button.
+   *
+   * @returns {void}
+   */
   const appNavigation = () => {
     navigate("weather");
   };
 
+  /**
+   * Navigates to the settings page.
+   * Called when user clicks the "Settings" button.
+   *
+   * @returns {void}
+   */
   const settingsNavigation = () => {
     navigate("settings");
   };
 
+  /**
+   * Navigates to the support page.
+   * Called when user clicks the "Support" button.
+   *
+   * @returns {void}
+   */
   const supportNavigation = () => {
     navigate("support");
   };
@@ -17,6 +72,7 @@ const FooterNav = (props) => {
   return (
     <React.Fragment>
       <section className="footer-nav d-flex flex-row align-items-center justify-content-around ">
+        {/* App/Home navigation - triggers appNavigation() */}
         <section
           role="button"
           className="footer-app-section brand-text-mute text-center "
@@ -36,6 +92,7 @@ const FooterNav = (props) => {
           </section>
           App
         </section>
+        {/* Search - delegates to parent via props.onClick */}
         <section
           role="button"
           className="footer-settings-section  brand-text-mute"
@@ -56,6 +113,7 @@ const FooterNav = (props) => {
           Search
         </section>
 
+        {/* Settings navigation - triggers settingsNavigation() */}
         <section
           role="button"
           className="footer-settings-section  brand-text-mute"
@@ -75,6 +133,7 @@ const FooterNav = (props) => {
           </section>
           Settings
         </section>
+        {/* Support navigation - triggers supportNavigation() */}
         <section
           role="button"
           className="footer-support-section brand-text-mute mx-1"
