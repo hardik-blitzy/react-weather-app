@@ -1,8 +1,31 @@
+/**
+ * settings.js
+ * User settings and preferences management.
+ *
+ * @module settings
+ * @description Provides functions for managing user preferences
+ * including default location, weather units, and app reset.
+ * Uses the Database class for persistence via localStorage.
+ *
+ * localStorage keys used:
+ * - USER_DEFAULT_LOCATION: User's preferred location
+ * - TRACK_SAVED_LOCATION_WEATHER: Auto-fetch weather toggle
+ * - WEATHER_UNIT: Temperature unit (metric/imperial)
+ */
+
 import { db } from "../backend/app_backend";
 import jQuery from "jquery";
 import Swal from "sweetalert2";
 import navigate from "../inc/scripts/utilities";
 
+/**
+ * Saves the user's default location preference.
+ * Validates input and displays appropriate feedback via SweetAlert2 toast.
+ * 
+ * @param {Event} e - Form submit event from the location input form
+ * @returns {void}
+ * @throws {void} Shows SweetAlert modal for invalid/empty location input
+ */
 export const saveLocation = (e) => {
 	e.preventDefault();
 
@@ -36,15 +59,34 @@ export const saveLocation = (e) => {
 	});
 };
 
+/**
+ * Retrieves the user's saved default location.
+ * 
+ * @returns {string|null} The saved location string or null if not set
+ */
 export const getDefaultLocation = () => {
 	return db.get("USER_DEFAULT_LOCATION");
 };
 
+/**
+ * Resets all application settings to factory defaults.
+ * Clears all localStorage data and redirects to home page.
+ * WARNING: This action cannot be undone.
+ * 
+ * @returns {void}
+ */
 export const restoreFactorySettings = () => {
 	db.destroy();
 	navigate("/");
 };
 
+/**
+ * Toggles automatic weather tracking for the saved location.
+ * Reads checkbox state from '#flexSwitchCheckDefault' DOM element
+ * and persists the preference with appropriate user feedback.
+ * 
+ * @returns {void}
+ */
 export const trackSavedLocationWeather = () => {
 	jQuery(($) => {
 		$.noConflict();
@@ -89,6 +131,11 @@ export const trackSavedLocationWeather = () => {
 	});
 };
 
+/**
+ * Checks if location tracking is enabled.
+ * 
+ * @returns {boolean} True if tracking is enabled, false otherwise
+ */
 export const checkTrackedLocation = () => {
 	let value = db.get("TRACK_SAVED_LOCATION_WEATHER");
 	if (value === true) {
@@ -98,11 +145,22 @@ export const checkTrackedLocation = () => {
 	}
 };
 
+/**
+ * Updates the temperature unit preference.
+ * Maps selection values to unit strings:
+ * - "0" → "metric" (Celsius)
+ * - "1" → "default" (Kelvin)
+ * - "2" → "imperial" (Fahrenheit)
+ * 
+ * @param {Event} e - Change event from unit selector dropdown
+ * @returns {void}
+ */
 export const changeWeatherUnit = (e) => {
 	jQuery(($) => {
 		e.preventDefault();
 		const weatherUnit = $("#weatherUnitContainer").val();
 		let unitToStore;
+		// Map selection index to OpenWeatherMap unit parameter
 		switch (weatherUnit) {
 			case "0":
 				unitToStore = "metric";
