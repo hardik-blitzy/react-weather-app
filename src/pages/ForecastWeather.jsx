@@ -1,3 +1,44 @@
+/**
+ * ForecastWeather.jsx
+ * 5-day weather forecast page component.
+ *
+ * @module ForecastWeather
+ * @description Displays weather forecasts in 3-hour intervals
+ * for 5 days. Fetches forecast data from OpenWeatherMap API
+ * and maps it to daily forecast components.
+ *
+ * Route: /forecast
+ *
+ * Features:
+ * - 5-day weather forecast display
+ * - 3-hour interval data (8 intervals per day)
+ * - Weather condition icons and descriptions
+ * - Click-to-see-details functionality via SweetAlert2
+ * - First day forecast cached to localStorage for home screen
+ *
+ * Data Structure:
+ * OpenWeatherMap 5-day forecast API returns 40 data points:
+ * - 8 intervals per day × 5 days = 40 entries in result.list
+ * - Each entry contains: dt_txt (datetime), main (temp), weather (conditions)
+ *
+ * Array Index Mapping:
+ * - Day 1: indices 0-7   (mapFirstDayData)
+ * - Day 2: indices 8-15  (mapSecondDayData)
+ * - Day 3: indices 16-23 (mapThirdDayData)
+ * - Day 4: indices 24-31 (mapFourthDayData)
+ * - Day 5: indices 32-39 (mapFifthDayData)
+ *
+ * localStorage keys:
+ * - Read: HOME_PAGE_SEEN, USER_DEFAULT_LOCATION, USER_LATITUDE, USER_LONGITUDE, WEATHER_UNIT
+ * - Write: WEATHER_FORECAST_TIME_0-7, WEATHER_FORECAST_ICON_0-7, WEATHER_FORECAST_UNIT_0-7, WEATHER_FORECAST_TITLE_0-7
+ *
+ * WARNING: Contains hard-coded API key. Move to environment
+ * variables for production deployment.
+ *
+ * @see ../apis/getCurrentWeather - checkWeatherCode for icon mapping
+ * @see ../inc/scripts/utilities - Time formatting utilities
+ */
+
 import React, { useState, useEffect } from "react";
 import Footer from "../components/footer";
 import navigate from "../inc/scripts/utilities";
@@ -25,8 +66,15 @@ import ScatteredClouds from "./../assets/static/scattered-clouds.svg";
 import FewClouds from "./../assets/static/few-clouds.svg";
 import Haze from "./../assets/static/haze.svg";
 import * as utilis from "./../inc/scripts/utilities";
+
+/**
+ * ForecastWeather React functional component.
+ * Fetches and displays 5-day weather forecast.
+ *
+ * @returns {JSX.Element} Forecast page with 5-day weather data
+ */
 const ForecastWeather = () => {
-	//check if the user navigated from the home page
+	// Redirect guard: Ensure user has completed onboarding
 	if (!db.get("HOME_PAGE_SEEN")) {
 		navigate("/");
 	}
@@ -37,12 +85,16 @@ const ForecastWeather = () => {
 	useEffect(() => {
 		jQuery(($) => {
 			$.noConflict();
+			// WARNING: API key hard-coded for development. For production:
+			// Use process.env.REACT_APP_OPENWEATHER_API_KEY
 			const $API_KEY = "cd34f692e856e493bd936095b256b337";
 			const $WEATHER_UNIT = db.get("WEATHER_UNIT") || "metric";
 			const $user_city = db.get("USER_DEFAULT_LOCATION");
 			const $user_latitude = db.get("USER_LATITUDE");
 			const $user_longitude = db.get("USER_LONGITUDE");
 			let FORECAST_URL;
+			// Determine API URL based on available location data:
+			// Priority: lat/lon coordinates > city name > error (no location)
 			if (
 				$user_city == null && $user_latitude == null &&
 				$user_longitude == null
@@ -107,6 +159,12 @@ const ForecastWeather = () => {
 		});
 	}, []);
 
+	/**
+	 * Toggles the utility footer component's visibility.
+	 * Uses jQuery to manipulate Bootstrap classes.
+	 *
+	 * @returns {void}
+	 */
 	const addUtilityComponentHeight = () => {
 		jQuery(($) => {
 			$.noConflict();
@@ -114,6 +172,18 @@ const ForecastWeather = () => {
 			$(".utility-component").toggleClass("add-utility-component-height");
 		});
 	};
+
+	/**
+	 * Template class for forecast weather data items.
+	 * Represents a single 3-hour forecast entry.
+	 *
+	 * @class WeatherTemplate
+	 * @param {number} id - Unique identifier for the forecast item
+	 * @param {string} time - Display time in 12-hour format (e.g., "3 PM")
+	 * @param {string} icon - Weather icon SVG path from checkWeatherCode
+	 * @param {number} unit - Temperature value (rounded up via Math.ceil)
+	 * @param {string} title - Weather condition description
+	 */
 	class WeatherTemplate {
 		constructor(id, time, icon, unit, title) {
 			this.id = id;
@@ -124,9 +194,25 @@ const ForecastWeather = () => {
 		}
 	}
 
-	//first day weather mapping
+	/**
+	 * Maps forecast data for Day 1 (today).
+	 * Processes API response list indices 0-7 (first 24 hours).
+	 * Also persists first day data to localStorage for home screen preview.
+	 *
+	 * Array Slicing: indices 0-7 (8 × 3-hour intervals = 24 hours)
+	 *
+	 * localStorage keys written:
+	 * - WEATHER_FORECAST_TIME_i (i=0..7): Time strings
+	 * - WEATHER_FORECAST_ICON_i: Weather condition codes
+	 * - WEATHER_FORECAST_UNIT_i: Temperature values
+	 * - WEATHER_FORECAST_TITLE_i: Weather descriptions
+	 *
+	 * @param {Object} result - OpenWeatherMap API forecast response
+	 * @param {Object[]} result.list - Array of 40 forecast entries
+	 * @returns {JSX.Element[]} Array of ForecastDailyWeatherComponent elements
+	 */
 	const mapFirstDayData = (result) => {
-		//first day data is from array 0-8
+		// Process 8 forecast intervals (3-hour slots for one day)
 		let outputArray = [];
 
 		for (let i = 0; i < 8; i++) {
@@ -142,7 +228,7 @@ const ForecastWeather = () => {
 				)
 			);
 
-			//save the first values into the database for reference @ the home screen
+			// Persist first day forecast to localStorage for home screen preview
 			db.create(
 				`WEATHER_FORECAST_TIME_${i}`,
 				`${utilis.convertTo12Hour(
@@ -188,9 +274,17 @@ const ForecastWeather = () => {
 		return firstWeatherDataForecast;
 	};
 
-	//second data mapping
+	/**
+	 * Maps forecast data for Day 2 (tomorrow).
+	 * Processes API response list indices 8-15.
+	 *
+	 * Array Slicing: indices 8-15 (hours 24-48)
+	 *
+	 * @param {Object} result - OpenWeatherMap API forecast response
+	 * @returns {JSX.Element[]} Array of ForecastDailyWeatherComponent elements
+	 */
 	const mapSecondDayData = (result) => {
-		//first day data is from array 8-16
+		// Process 8 forecast intervals (3-hour slots for day 2)
 		let outputArray = [];
 
 		for (let i = 8; i < 16; i++) {
@@ -235,9 +329,17 @@ const ForecastWeather = () => {
 		return secondWeatherDataForecast;
 	};
 
-	//third data mapping
+	/**
+	 * Maps forecast data for Day 3.
+	 * Processes API response list indices 16-23.
+	 *
+	 * Array Slicing: indices 16-23 (hours 48-72)
+	 *
+	 * @param {Object} result - OpenWeatherMap API forecast response
+	 * @returns {JSX.Element[]} Array of ForecastDailyWeatherComponent elements
+	 */
 	const mapThirdDayData = (result) => {
-		//first day data is from array 16-24
+		// Process 8 forecast intervals (3-hour slots for day 3)
 		let outputArray = [];
 
 		for (let i = 16; i < 24; i++) {
@@ -282,9 +384,17 @@ const ForecastWeather = () => {
 		return thirdWeatherDataForecast;
 	};
 
-	//fourth data mapping
+	/**
+	 * Maps forecast data for Day 4.
+	 * Processes API response list indices 24-31.
+	 *
+	 * Array Slicing: indices 24-31 (hours 72-96)
+	 *
+	 * @param {Object} result - OpenWeatherMap API forecast response
+	 * @returns {JSX.Element[]} Array of ForecastDailyWeatherComponent elements
+	 */
 	const mapFourthDayData = (result) => {
-		//first day data is from array 24-32
+		// Process 8 forecast intervals (3-hour slots for day 4)
 		let outputArray = [];
 
 		for (let i = 24; i < 32; i++) {
@@ -329,9 +439,17 @@ const ForecastWeather = () => {
 		return forthWeatherDataForecast;
 	};
 
-	//fifth data mapping
+	/**
+	 * Maps forecast data for Day 5.
+	 * Processes API response list indices 32-39.
+	 *
+	 * Array Slicing: indices 32-39 (hours 96-120)
+	 *
+	 * @param {Object} result - OpenWeatherMap API forecast response
+	 * @returns {JSX.Element[]} Array of ForecastDailyWeatherComponent elements
+	 */
 	const mapFifthDayData = (result) => {
-		//first day data is from array 32-40
+		// Process 8 forecast intervals (3-hour slots for day 5)
 		let outputArray = [];
 
 		for (let i = 32; i < 40; i++) {
