@@ -1,3 +1,36 @@
+/**
+ * WeatherMain.jsx
+ * Detailed weather information page.
+ *
+ * @module WeatherMain
+ * @description Shows extended weather details including
+ * full weather metrics. Reads cached weather data from
+ * localStorage that was populated by the Weather.jsx page.
+ *
+ * Route: /weathermain
+ *
+ * Displays:
+ * - Current temperature (from WEATHER_DEG)
+ * - Weather description (from WEATHER_DESCRIPTION)
+ * - Location name (from WEATHER_LOCATION)
+ * - Wind speed (from SUB_WEATHER_WIND_VALUE)
+ * - Humidity percentage (from SUB_WEATHER_HUMIDITY_VALUE)
+ * - Atmospheric pressure (from SUB_WEATHER_PRESSURE_VALUE)
+ *
+ * localStorage keys read:
+ * - WEATHER_LOCATION: City and country name
+ * - WEATHER_DEG: Current temperature value
+ * - WEATHER_DESCRIPTION: Weather condition text
+ * - SUB_WEATHER_WIND_VALUE: Wind speed in m/s
+ * - SUB_WEATHER_HUMIDITY_VALUE: Humidity percentage
+ * - SUB_WEATHER_PRESSURE_VALUE: Pressure in hPa
+ *
+ * Note: This page displays cached data only - it does not
+ * make API calls. Data must be fetched first via Weather.jsx
+ *
+ * @see ./Weather.jsx - Primary weather page that fetches data
+ * @see ../backend/app_backend - Database (db) for localStorage access
+ */
 import React from "react";
 import Footer from "../components/footer";
 import navigate from "../inc/scripts/utilities";
@@ -21,7 +54,21 @@ import { db } from "../backend/app_backend";
 import HumidityIcon from "./../assets/humidity-icon.svg";
 import WindIcon from "./../assets/wind-icon.svg";
 import PressureIcon from "./../assets/pressure-icon.svg";
+
+/**
+ * WeatherMain page React functional component.
+ * Renders detailed weather metrics from cached localStorage data.
+ *
+ * @param {Object} props - Component props (currently unused)
+ * @returns {JSX.Element} Detailed weather page with metrics display
+ */
 const WeatherMain = (props) => {
+	/**
+	 * Navigates user back to the main weather page.
+	 * Called when user clicks the back arrow.
+	 *
+	 * @returns {void}
+	 */
 	const navigateHome = () => {
 		navigate("/weather");
 	};
@@ -50,6 +97,7 @@ const WeatherMain = (props) => {
 					</div>
 					<section className="city-locaton">
 						<h5 className="fw-bold fs-5">
+							{/* Display location or default fallback */}
 							{db.get("WEATHER_LOCATION") || "Lagos, 9ja"}
 						</h5>
 					</section>
@@ -72,6 +120,7 @@ const WeatherMain = (props) => {
 				<section className="current-weather-value-container d-flex align-items-center justify-content-center flex-column my-4">
 					<section className="d-flex ">
 						<h1 className="current-weather-value fw-bold brand-large-text">
+							{/* Display temperature or default 30 */}
 							{Math.ceil(db.get("WEATHER_DEG")) || "30"}
 						</h1>
 
@@ -83,6 +132,7 @@ const WeatherMain = (props) => {
 					<p
 						className="text-muted text-start brand-small-text text-capitalize"
 						style={customTextStyle}>
+						{/* Display weather description or default */}
 						{db.get("WEATHER_DESCRIPTION") || "clear sky"}
 					</p>
 				</section>
@@ -94,6 +144,7 @@ const WeatherMain = (props) => {
 						<p
 							className="wind-value fw-bold text-light  brand-small-text text-center py-1 m-0"
 							id="wind-value">
+							{/* Wind speed with default fallback */}
 							{db.get("SUB_WEATHER_WIND_VALUE") || "2.90 m/s"}
 						</p>
 						<p className="m-0 wind-text text-muted text-capitalize brand-small-text-2 weather-text text-center">
@@ -113,6 +164,7 @@ const WeatherMain = (props) => {
 						<p
 							className="humidity-value fw-bold text-light  brand-small-text  text-center py-1 m-0"
 							id="humidity-value">
+							{/* Humidity percentage with default fallback */}
 							{db.get("SUB_WEATHER_HUMIDITY_VALUE") || "98%"}
 						</p>
 						<p className="m-0 humidity-text text-muted text-capitalize text-center brand-small-text-2 weather-text">
@@ -132,6 +184,7 @@ const WeatherMain = (props) => {
 						<p
 							className="rain-value fw-bold text-light brand-small-text  text-center py-1 m-0"
 							id="pressure-value">
+							{/* Atmospheric pressure with default fallback */}
 							{db.get("SUB_WEATHER_PRESSURE_VALUE") || "1000 hPa"}
 						</p>
 						<p className="m-0 rain-text text-muted text-capitalize text-center brand-small-text-2 weather-text">
