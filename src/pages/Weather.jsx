@@ -1,3 +1,45 @@
+/**
+ * Weather.jsx
+ * Main weather display page component.
+ *
+ * @module WeatherApp
+ * @description Primary weather page featuring current weather
+ * conditions display, city search functionality, and navigation
+ * to detailed weather and forecast views.
+ *
+ * Route: /weather
+ *
+ * Features:
+ * - Current weather conditions display
+ * - City search with autocomplete via API Ninjas
+ * - Temperature, humidity, wind, pressure data
+ * - Navigation to WeatherMain (detailed view)
+ * - Navigation to ForecastWeather (5-day forecast)
+ * - Geolocation-based weather fetching
+ * - Cached forecast strip from localStorage
+ *
+ * State Management:
+ * - componentToInsert: Dynamic utility component content
+ * - weatherInput: Search input value
+ * - Uses localStorage for data persistence
+ *
+ * localStorage keys read:
+ * - HOME_PAGE_SEEN: Redirect guard
+ * - USER_DEFAULT_LOCATION: Default search location
+ * - WEATHER_FORECAST_TIME_0-7: Cached forecast times
+ * - WEATHER_FORECAST_ICON_0-7: Cached forecast icons
+ * - WEATHER_FORECAST_UNIT_0-7: Cached forecast temps
+ *
+ * API Integration:
+ * - Uses formHandler (getCurrentWeather API) for weather data
+ * - Uses getGeolocation for browser location tracking
+ *
+ * @see ../apis/getCurrentWeather - Weather API integration
+ * @see ../apis/getGeolocation - Browser geolocation
+ * @see ./WeatherMain.jsx - Detailed weather view
+ * @see ./ForecastWeather.jsx - 5-day forecast view
+ */
+
 import React, { useState, useRef, useEffect } from "react";
 import jQuery from "jquery";
 import Button from "./../components/button";
@@ -31,8 +73,14 @@ import HumidityIcon from "./../assets/humidity-icon.svg";
 import WindIcon from "./../assets/wind-icon.svg";
 import PressureIcon from "./../assets/pressure-icon.svg";
 
+/**
+ * WeatherApp React functional component.
+ * Main weather display with search, current conditions, and forecast preview.
+ *
+ * @returns {JSX.Element} Main weather page
+ */
 const WeatherApp = () => {
-	//check if the user navigated from the home page
+	// Redirect guard: Send users to onboarding if they haven't completed setup
 	if (!db.get("HOME_PAGE_SEEN")) {
 		navigate("/");
 	}
@@ -43,6 +91,12 @@ const WeatherApp = () => {
 
 	savedLocation = db.get("USER_DEFAULT_LOCATION");
 
+	/**
+	 * Toggles the utility footer component's visibility.
+	 * Uses jQuery to manipulate Bootstrap classes for show/hide.
+	 *
+	 * @returns {void}
+	 */
 	const addUtilityComponentHeight = () => {
 		jQuery(($) => {
 			$.noConflict();
@@ -51,9 +105,25 @@ const WeatherApp = () => {
 		});
 	};
 
+	/**
+	 * Navigates to the forecast weather page.
+	 *
+	 * @returns {void}
+	 */
 	const navigateToForecast = () =>{
 		navigate("/forecast");
 	}
+
+	/**
+	 * Template class for cached forecast data items.
+	 * Represents a single forecast entry with time, icon, and temperature.
+	 *
+	 * @class MappedSavedDataTemplate
+	 * @param {number} id - Unique identifier for the forecast item
+	 * @param {string} time - Display time (e.g., "12pm")
+	 * @param {string} icon - Weather icon SVG path
+	 * @param {string} unit - Temperature value
+	 */
 	class MappedSavedDataTemplate {
 		constructor(id, time, icon, unit) {
 			this.id = id;
@@ -63,6 +133,16 @@ const WeatherApp = () => {
 		}
 	}
 
+	/**
+	 * Maps cached forecast data from localStorage to UI components.
+	 * Reads WEATHER_FORECAST_TIME/ICON/UNIT keys for 8 time slots.
+	 * Falls back to default values if keys are not set.
+	 *
+	 * Array indices 0-7 represent 8 three-hour forecast intervals
+	 * (24 hours of forecast data from the current day).
+	 *
+	 * @returns {JSX.Element[]} Array of FutureWeatherComponent elements
+	 */
 	const mapDbSavedData = () => {
 		const count = 8;
 
@@ -115,10 +195,16 @@ const WeatherApp = () => {
 		},
 	];
 
+	/**
+	 * Navigates to the detailed weather view page.
+	 *
+	 * @returns {void}
+	 */
 	const showMoreWeather = () => {
 		navigate("weathermain");
 	};
 
+	// Maps static forecast data to ForecastWeatherItems components
 	const uiForeCastData = forecastData.map((data, index) => {
 		return (
 			<ForecastWeatherItems
@@ -129,10 +215,23 @@ const WeatherApp = () => {
 			/>
 		);
 	});
+
+	/**
+	 * Navigates to the forecast weather page.
+	 * Used by the "forecast weather" button in utility component.
+	 *
+	 * @returns {void}
+	 */
 	const showForecastWeather = () => {
 		navigate("/forecast");
 	};
-	//create the weather forecast component
+
+	/**
+	 * Utility component showing forecast preview and navigation button.
+	 * Displayed in the expandable footer section.
+	 *
+	 * @returns {JSX.Element} Forecast preview with navigation button
+	 */
 	const UtilityForecastTags = () => {
 		return (
 			<section className="cmp d-flex align-items-center justify-content-center flex-column my-5">
@@ -155,15 +254,25 @@ const WeatherApp = () => {
 		);
 	};
 
-	//function to check if the dashboard icon was clicked
-
+	/**
+	 * Shows the forecast utility component in the footer.
+	 * Triggered by clicking the forecast icon in footer nav.
+	 *
+	 * @returns {void}
+	 */
 	const beginWeatherForecast = () => {
 		addUtilityComponentHeight();
-		//change the variable to hold the current component to insert
+		// Change the variable to hold the current component to insert
 		setComponentToInsert(<UtilityForecastTags />);
 		
 	};
 
+	/**
+	 * Search form component for looking up weather by city.
+	 * Includes city autocomplete and saved location quick-search.
+	 *
+	 * @returns {JSX.Element} Search form with autocomplete
+	 */
 	const SearchComponent = () => {
 		const [searchValue, setSearchValue] = useState("");
 		return (
@@ -214,14 +323,31 @@ const WeatherApp = () => {
 		);
 	};
 
+	/**
+	 * Autocomplete dropdown component for city search.
+	 * Queries API Ninjas for matching cities when search length > 3.
+	 *
+	 * @param {Object} props - Component props
+	 * @param {string} props.search - Current search input value
+	 * @returns {JSX.Element} Dropdown list of matching cities
+	 */
 	const SearchMenuComponent = ({search}) => {
 		const [dataArray, changeDataArray] = useState([]);
+
+		// Fetch city suggestions when search term exceeds 3 characters
 		useEffect(()=>{
 			if(search.length > 3){
 				formHandler.findCity(search,changeDataArray)
 			}
 		},[search])
 
+		/**
+		 * Handles city selection from autocomplete dropdown.
+		 * Sets the selected city name in the input and triggers weather fetch.
+		 *
+		 * @param {Event} e - Click event from the list item
+		 * @returns {void}
+		 */
 		function clickHandler(e){
 			jQuery("#searchWeather").val(e.target.textContent)
 			formHandler.handleWeatherForm(e, savedLocation);
@@ -237,7 +363,12 @@ const WeatherApp = () => {
 		)
 	}
 
-	//load the search component into the utility component
+	/**
+	 * Opens the search component in the utility footer.
+	 * Triggered by clicking the search icon in footer nav.
+	 *
+	 * @returns {void}
+	 */
 	const testSearch = () => {
 		addUtilityComponentHeight();
 		setComponentToInsert(<SearchComponent />);
