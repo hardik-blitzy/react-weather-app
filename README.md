@@ -15,6 +15,7 @@
 7. Built using modern UI technologies.
 8. Cross-platform compatibility.
 9. Built on PWA technology.
+10. Smooth splash screen transitions between screen navigation for a polished user experience.
 
 ## Technologies Used
 
