@@ -75,6 +75,11 @@ const SplashScreen = () => {
           <h1 className="splash-title" data-testid="splash-title">
             Weather App
           </h1>
+          
+          {/* Application subtitle */}
+          <p className="splash-subtitle" data-testid="splash-subtitle">
+            Your daily forecast
+          </p>
         </motion.div>
       )}
     </AnimatePresence>
