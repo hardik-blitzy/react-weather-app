@@ -41,6 +41,15 @@ describe('SplashScreen Component', () => {
     mockNavigationContext.isVisible = false;
   });
 
+  describe('Basic Rendering', () => {
+    test('renders without crashing', () => {
+      // This test verifies the component can be rendered without throwing errors
+      expect(() => {
+        renderWithProviders();
+      }).not.toThrow();
+    });
+  });
+
   describe('Visibility States', () => {
     test('renders nothing when isVisible is false', () => {
       mockNavigationContext.isVisible = false;
@@ -69,6 +78,15 @@ describe('SplashScreen Component', () => {
       expect(logo).toBeInTheDocument();
       expect(logo.tagName.toLowerCase()).toBe('img');
       expect(logo).toHaveAttribute('alt', 'Weather App Logo');
+    });
+
+    test('renders logo image with correct src (pic_1.png)', () => {
+      renderWithProviders();
+      
+      const logo = screen.getByTestId('splash-logo');
+      expect(logo).toBeInTheDocument();
+      // Verify src attribute contains pic_1.png (may be transformed by bundler)
+      expect(logo.getAttribute('src')).toMatch(/pic_1\.png/i);
     });
 
     test('displays "Weather App" title', () => {
