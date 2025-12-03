@@ -9,7 +9,6 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import SplashScreen from './SplashScreen';
-import { NavigationProvider } from '../context/NavigationContext';
 
 // Mock NavigationContext to control visibility state
 const mockNavigationContext = {
