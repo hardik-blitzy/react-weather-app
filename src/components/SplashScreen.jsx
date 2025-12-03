@@ -1,59 +1,39 @@
 /**
  * SplashScreen.jsx
  * 
- * A simple splash screen component that displays during navigation transitions.
- * Features the application logo and name with smooth fade-in/out animations.
+ * Main splash screen presentational component that displays during navigation
+ * transitions between screens. Renders a full-viewport fixed overlay with 
+ * centered logo (pic_1.png) and app title "Weather App".
  * 
- * Uses:
- * - framer-motion for entry/exit animations
- * - NavigationContext for visibility state management
- * - Existing CSS custom properties for consistent branding
+ * Uses framer-motion AnimatePresence for smooth entry/exit animations:
+ * - Entry: opacity 0→1, scale 0.9→1 over 300ms with easeOut
+ * - Exit: opacity 1→0, scale 1→1.1 over 200ms with easeIn
+ * 
+ * Consumes NavigationContext via useNavigation hook to determine visibility state.
  * 
  * @component
  */
 
-import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigation } from '../context/NavigationContext';
 import Logo from '../assets/pic_1.png';
-
-/**
- * Animation configuration for splash screen transitions
- * @constant {Object}
- */
-const splashAnimationConfig = {
-  initial: {
-    opacity: 0,
-    scale: 0.9
-  },
-  animate: {
-    opacity: 1,
-    scale: 1,
-    transition: {
-      duration: 0.3,
-      ease: 'easeOut'
-    }
-  },
-  exit: {
-    opacity: 0,
-    scale: 1.05,
-    transition: {
-      duration: 0.2,
-      ease: 'easeIn'
-    }
-  }
-};
 
 /**
  * SplashScreen Component
  * 
  * Renders a full-viewport overlay with the application logo and name.
  * Appears during route transitions based on NavigationContext visibility state.
+ * Provides visual feedback during navigation - both forward and backward.
  * 
- * @returns {JSX.Element|null} Splash screen overlay or null when not visible
+ * CSS Classes Used:
+ * - .splash-screen: Fixed full-viewport overlay with gradient background (z-index: 10001)
+ * - .splash-logo: Logo sizing (150px width, auto height)
+ * - .splash-title: White text, bold, 1.8rem font size
+ * 
+ * @returns {JSX.Element} AnimatePresence wrapper with conditional splash screen overlay
  * 
  * @example
- * // Usage in App.js
+ * // Usage in App.js (must be inside NavigationProvider)
  * <NavigationProvider>
  *   <SplashScreen />
  *   <Routes>...</Routes>
@@ -61,63 +41,40 @@ const splashAnimationConfig = {
  */
 const SplashScreen = () => {
   // Get visibility state from navigation context
+  // isVisible is true when route change is detected, false after SPLASH_DURATION
   const { isVisible } = useNavigation();
 
   return (
-    <AnimatePresence mode="wait">
+    <AnimatePresence>
       {isVisible && (
         <motion.div
           key="splash-screen"
           className="splash-screen"
-          initial={splashAnimationConfig.initial}
-          animate={splashAnimationConfig.animate}
-          exit={splashAnimationConfig.exit}
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 1.1 }}
+          transition={{ 
+            duration: 0.3,
+            ease: 'easeOut',
+            exit: { 
+              duration: 0.2, 
+              ease: 'easeIn' 
+            }
+          }}
           data-testid="splash-screen"
         >
-          {/* Logo container with animation */}
-          <motion.div
-            className="splash-logo-container"
-            initial={{ y: -20, opacity: 0 }}
-            animate={{ 
-              y: 0, 
-              opacity: 1,
-              transition: { delay: 0.1, duration: 0.3 }
-            }}
-          >
-            <img 
-              src={Logo} 
-              alt="Weather App Logo" 
-              className="splash-logo"
-              data-testid="splash-logo"
-            />
-          </motion.div>
-
-          {/* Application title with animation */}
-          <motion.h1
-            className="splash-title"
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ 
-              y: 0, 
-              opacity: 1,
-              transition: { delay: 0.15, duration: 0.3 }
-            }}
-            data-testid="splash-title"
-          >
+          {/* Application logo */}
+          <img 
+            src={Logo} 
+            alt="Weather App Logo" 
+            className="splash-logo"
+            data-testid="splash-logo"
+          />
+          
+          {/* Application title */}
+          <h1 className="splash-title" data-testid="splash-title">
             Weather App
-          </motion.h1>
-
-          {/* Optional subtitle for additional branding */}
-          <motion.p
-            className="splash-subtitle"
-            initial={{ opacity: 0 }}
-            animate={{ 
-              opacity: 0.8,
-              transition: { delay: 0.2, duration: 0.3 }
-            }}
-            data-testid="splash-subtitle"
-          >
-            Your daily forecast
-          </motion.p>
+          </h1>
         </motion.div>
       )}
     </AnimatePresence>
