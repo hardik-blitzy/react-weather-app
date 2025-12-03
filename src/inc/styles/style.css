@@ -299,3 +299,105 @@ section.footer-nav > section {
 ul{
 	list-style: none;
 }
+
+/* =====================================================
+   Splash Screen Styles
+   Displays during navigation transitions
+   ===================================================== */
+
+/**
+ * Main splash screen container
+ * Full viewport overlay with gradient background
+ * z-index 10001 ensures it appears above spinner (10000)
+ */
+.splash-screen {
+	position: fixed;
+	inset: 0;
+	z-index: 10001;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	background: linear-gradient(
+		135deg,
+		var(--brand-primary-color),
+		var(--brand-secondary-color)
+	);
+	will-change: opacity, transform;
+}
+
+/**
+ * Logo container for optional styling
+ */
+.splash-logo-container {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+/**
+ * Splash screen logo
+ * Responsive sizing with auto height
+ */
+.splash-logo {
+	width: 150px;
+	height: auto;
+	margin-bottom: 20px;
+	object-fit: contain;
+}
+
+/**
+ * Application title on splash screen
+ * Uses brand white color and bold weight
+ */
+.splash-title {
+	color: var(--brand-white-color);
+	font-size: 1.8rem;
+	font-weight: bold;
+	text-align: center;
+	margin: 0;
+	padding: 0 20px;
+}
+
+/**
+ * Optional subtitle on splash screen
+ * Slightly reduced opacity for hierarchy
+ */
+.splash-subtitle {
+	color: var(--brand-white-color);
+	font-size: var(--brand-footer-nav-fontsize);
+	opacity: 0.8;
+	margin-top: 8px;
+	text-align: center;
+	padding: 0 20px;
+}
+
+/* Responsive adjustments for smaller screens */
+@media screen and (max-width: 480px) {
+	.splash-logo {
+		width: 120px;
+	}
+	
+	.splash-title {
+		font-size: 1.5rem;
+	}
+	
+	.splash-subtitle {
+		font-size: 0.85rem;
+	}
+}
+
+/* Responsive adjustments for larger screens */
+@media screen and (min-width: 768px) {
+	.splash-logo {
+		width: 180px;
+	}
+	
+	.splash-title {
+		font-size: 2.2rem;
+	}
+	
+	.splash-subtitle {
+		font-size: 1rem;
+	}
+}

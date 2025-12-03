@@ -54,8 +54,8 @@ const NavigationProvider = ({ children }) => {
   // State for splash screen visibility
   const [isVisible, setIsVisible] = useState(false);
   
-  // Track the previous pathname to detect actual route changes
-  const [previousPath, setPreviousPath] = useState('');
+  // Track the previous pathname to detect actual route changes (using ref to avoid re-renders)
+  const previousPathRef = useRef('');
   
   // Ref to store timeout ID for cleanup on rapid navigation
   const timeoutRef = useRef(null);
@@ -104,14 +104,14 @@ const NavigationProvider = ({ children }) => {
     // Skip splash screen on initial app load - only show during navigation
     if (isInitialMount.current) {
       isInitialMount.current = false;
-      setPreviousPath(location.pathname);
+      previousPathRef.current = location.pathname;
       return;
     }
 
     // Check if the route has actually changed
-    if (location.pathname !== previousPath) {
+    if (location.pathname !== previousPathRef.current) {
       // Update the previous path to current
-      setPreviousPath(location.pathname);
+      previousPathRef.current = location.pathname;
       
       // Show the splash screen
       setIsVisible(true);
@@ -136,7 +136,7 @@ const NavigationProvider = ({ children }) => {
         timeoutRef.current = null;
       }
     };
-  }, [location.pathname, previousPath]);
+  }, [location.pathname]);
 
   /**
    * Context value object containing all splash screen state and controls
