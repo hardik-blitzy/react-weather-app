@@ -76,7 +76,7 @@ Detailed documentation for each module is available in the respective directorie
 
 | Module | Path | Description |
 |--------|------|-------------|
-test corrupt PR
+| Src Overview | [src/](src/README.md) | Source code overview and module navigation |
 | APIs | [src/apis/](src/apis/README.md) | Weather API integration layer (OpenWeatherMap, API Ninjas) |
 | Backend | [src/backend/](src/backend/README.md) | LocalStorage persistence layer and Database class |
 | Components | [src/components/](src/components/README.md) | Reusable React UI components library |
