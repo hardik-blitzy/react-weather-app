@@ -1,12 +1,26 @@
+/**
+ * Current Weather API Module
+ * 
+ * Handles weather data fetching, DOM updates, and weather icon mapping.
+ * Uses centralized toast helper functions for consistent notifications.
+ * 
+ * @module getCurrentWeather
+ * @requires jquery
+ * @requires ../backend/app_backend
+ * @requires ../inc/scripts/utilities
+ * @requires ../utils/toastHelper
+ */
+
 import jQuery from "jquery";
 import { db } from "../backend/app_backend";
 import { getCurrentDate } from "../inc/scripts/utilities";
 import { showError, showWarning, showInfo } from "../utils/toastHelper";
+
+// Weather condition SVG icons - mapped to OpenWeatherMap condition codes
 import Thunder from "./../assets/static/thunder.svg";
 import Day from "./../assets/static/day.svg";
 import Drizzle from "./../assets/static/rainy-5.svg";
 import Rainy from "./../assets/static/rainy-7.svg";
-// Snowy import removed - not currently used in weather code mapping
 import FreezingRain from "./../assets/static/freezing-rain.svg";
 import Misty from "./../assets/static/mist.svg";
 import BrokenClouds from "./../assets/static/broken-clouds.svg";
@@ -15,6 +29,9 @@ import ScatteredClouds from "./../assets/static/scattered-clouds.svg";
 import FewClouds from "./../assets/static/few-clouds.svg";
 import Haze from "./../assets/static/haze.svg";
 
+/**
+ * Closes the utility component overlay by hiding related DOM elements.
+ */
 export const closeUtilityComponent = () => {
 	jQuery(($) => {
 		$.noConflict();
@@ -22,6 +39,8 @@ export const closeUtilityComponent = () => {
 		$(".utility-component").removeClass("add-utility-component-height");
 	});
 };
+
+/** OpenWeatherMap API key */
 export const API_KEY = "cd34f692e856e493bd936095b256b337";
 
 export const WEATHER_UNIT = db.get("WEATHER_UNIT") || "metric";

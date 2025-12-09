@@ -134,12 +134,8 @@ export const trackSavedLocationWeather = () => {
  * }
  */
 export const checkTrackedLocation = () => {
-	let value = db.get("TRACK_SAVED_LOCATION_WEATHER");
-	if (value === true) {
-		return true;
-	} else {
-		return false;
-	}
+	// Returns true only if tracking is explicitly enabled
+	return db.get("TRACK_SAVED_LOCATION_WEATHER") === true;
 };
 
 /**

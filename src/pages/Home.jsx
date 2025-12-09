@@ -1,3 +1,13 @@
+/**
+ * Home Page Component
+ * 
+ * Landing page for first-time users. Prompts for default location
+ * and initializes user preferences in the database.
+ * Uses centralized toast helper for consistent success/error notifications.
+ * 
+ * @component Home
+ */
+
 import React from "react";
 import Button from "./../components/button";
 import Img_1 from "./../assets/pic_1.png";
@@ -7,18 +17,18 @@ import { db } from "./../backend/app_backend";
 import Swal from "sweetalert2";
 import { showSuccess, showError } from "../utils/toastHelper";
 import jQuery from "jquery";
+
 const Home = () => {
   const customBtnStyle = {
     fontSize: "18px",
   };
 
+  /**
+   * Handles the initial location setup click event.
+   * Opens a modal to collect user's default location, validates input,
+   * and initializes user preferences in the database.
+   */
   function click() {
-    /**
-     * Default App page
-     * The user wouldn't be redirected here on next visit
-     *
-     */
-
     Swal.fire({
       title: "Default Location",
       html: "<input type='text' placeholder='Enter location' class='form-control border-1 p-3 brand-small-text w-100' id='defaultLocation'>",
@@ -34,17 +44,17 @@ const Home = () => {
           const $defaultLocation = $("#defaultLocation").val().trim();
 
           if ($defaultLocation === undefined || $defaultLocation === "") {
-            // Display error toast for invalid/empty location
+            // Validation failed - show error toast notification
             showError("Please enter a valid location");
           } else {
-            // Display success toast for saved location
+            // Validation passed - show success toast and initialize user data
             showSuccess("Location saved successfully!", 3000);
 
-            //create a database attribute and save it
+            // Initialize user preferences in the database
             db.create("HOME_PAGE_SEEN", true);
             db.create("USER_DEFAULT_LOCATION", $defaultLocation);
-            db.create("TRACK_SAVED_LOCATION_WEATHER",false);
-            db.create("WEATHER_UNIT","metric");
+            db.create("TRACK_SAVED_LOCATION_WEATHER", false);
+            db.create("WEATHER_UNIT", "metric");
             navigate("weather");
           }
         });
