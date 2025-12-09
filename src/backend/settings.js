@@ -1,8 +1,38 @@
+/**
+ * Settings Backend Module
+ * 
+ * Handles user settings and preferences for the React Weather Application.
+ * Manages location settings, weather unit preferences, and tracking configuration.
+ * 
+ * Uses centralized toast helper functions for consistent notification display.
+ * 
+ * @module settings
+ * @requires ../backend/app_backend
+ * @requires jquery
+ * @requires ../utils/toastHelper
+ * @requires ../inc/scripts/utilities
+ */
+
 import { db } from "../backend/app_backend";
 import jQuery from "jquery";
-import Swal from "sweetalert2";
+import { showSuccess, showError, showWarning, showInfo } from "../utils/toastHelper";
 import navigate from "../inc/scripts/utilities";
 
+/**
+ * Saves the user's default location preference.
+ * 
+ * Validates the input location and updates the database if valid.
+ * Displays appropriate toast notifications for success or validation errors.
+ * 
+ * @param {Event} e - The form submit event
+ * @returns {void}
+ * 
+ * @example
+ * // Usage in form onSubmit handler
+ * <form onSubmit={saveLocation}>
+ *   <input id="defaultLocation" />
+ * </form>
+ */
 export const saveLocation = (e) => {
 	e.preventDefault();
 
@@ -11,84 +41,98 @@ export const saveLocation = (e) => {
 
 		const $defaultLocation = $("#defaultLocation").val().trim();
 
-		//check if the location is empty
-		if ($defaultLocation === undefined || $defaultLocation === "") {
-			Swal.fire({
-				title: "Invalid Location!",
-				html: "<p class=' text-center text-danger'>Please enter a valid location</p>",
-				confirmButtonColor: "rgb(83, 166, 250)",
-				allowOutsideClick: false,
-				allowEscapeKey: false,
-				allowEnterKey: false,
-				timer: 4000,
-			});
+		// Check if the location is empty
+		if ($defaultLocation === undefined || $defaultLocation == "") {
+			showError("Please enter a valid location", 4000);
 		} else {
 			db.update("USER_DEFAULT_LOCATION", $defaultLocation);
-			Swal.fire({
-				text: "Location updated successfully!",
-				icon: "success",
-				toast: true,
-				position: "top",
-				showConfirmButton: false,
-				timer: 3000,
-			});
+			showSuccess("Location updated successfully!", 3000);
 		}
 	});
 };
 
+/**
+ * Retrieves the user's default location from the database.
+ * 
+ * @returns {string|null} The saved default location or null if not set
+ * 
+ * @example
+ * const location = getDefaultLocation();
+ * if (location) {
+ *   fetchWeatherForLocation(location);
+ * }
+ */
 export const getDefaultLocation = () => {
 	return db.get("USER_DEFAULT_LOCATION");
 };
 
+/**
+ * Restores all settings to factory defaults.
+ * 
+ * Destroys all stored data in the database and navigates to the home page.
+ * This action is irreversible.
+ * 
+ * @returns {void}
+ * 
+ * @example
+ * // Usage in reset settings button
+ * <button onClick={restoreFactorySettings}>Reset All Settings</button>
+ */
 export const restoreFactorySettings = () => {
 	db.destroy();
 	navigate("/");
 };
 
+/**
+ * Toggles the saved location weather tracking feature.
+ * 
+ * When enabled, the application will automatically fetch weather for the
+ * saved default location. Displays appropriate toast notifications based
+ * on the toggle state and whether it's a new setting or update.
+ * 
+ * @returns {void}
+ * 
+ * @example
+ * // Usage in checkbox onChange handler
+ * <input 
+ *   type="checkbox" 
+ *   id="flexSwitchCheckDefault" 
+ *   onChange={trackSavedLocationWeather} 
+ * />
+ */
 export const trackSavedLocationWeather = () => {
 	jQuery(($) => {
 		$.noConflict();
 		const $toggleBtn = document.getElementById("flexSwitchCheckDefault");
 
 		if ($toggleBtn.checked) {
-			//check if the value is in the database, then update it
+			// Check if the value is in the database, then update it
 			if (db.get("TRACK_SAVED_LOCATION_WEATHER")) {
 				db.update("TRACK_SAVED_LOCATION_WEATHER", true);
-				Swal.fire({
-					text: "Saved location would be tracked!",
-					icon: "success",
-					toast: true,
-					position: "top",
-					showConfirmButton: false,
-					timer: 3000,
-				});
+				showSuccess("Saved location would be tracked!", 3000);
 			} else {
 				db.create("TRACK_SAVED_LOCATION_WEATHER", true);
-				Swal.fire({
-					text: "Saved location would be tracked by default!",
-					icon: "info",
-					toast: true,
-					position: "top",
-					showConfirmButton: false,
-					timer: 3000,
-				});
+				showInfo("Saved location would be tracked by default!", 3000);
 			}
 		} else {
 			if (db.get("TRACK_SAVED_LOCATION_WEATHER")) {
 				db.update("TRACK_SAVED_LOCATION_WEATHER", false);
-				Swal.fire({
-					text: "Saved location would not be tracked!",
-					icon: "warning",
-					toast: true,
-					position: "top",
-					showConfirmButton: false,
-					timer: 3000,
-				});
+				showWarning("Saved location would not be tracked!", 3000);
 			}
 		}
 	});
 };
 
+/**
+ * Checks if location tracking is currently enabled.
+ * 
+ * @returns {boolean} True if location tracking is enabled, false otherwise
+ * 
+ * @example
+ * if (checkTrackedLocation()) {
+ *   fetchWeatherForSavedLocation();
+ * }
+ */
 export const checkTrackedLocation = () => {
 	let value = db.get("TRACK_SAVED_LOCATION_WEATHER");
 	if (value === true) {
@@ -98,6 +142,29 @@ export const checkTrackedLocation = () => {
 	}
 };
 
+/**
+ * Changes the weather unit preference.
+ * 
+ * Converts the dropdown selection value to the corresponding unit string
+ * and stores it in the database. Supports metric, default (Kelvin), and
+ * imperial unit systems.
+ * 
+ * Unit mapping:
+ * - "0" -> "metric" (Celsius)
+ * - "1" -> "default" (Kelvin)
+ * - "2" -> "imperial" (Fahrenheit)
+ * 
+ * @param {Event} e - The form submit or change event
+ * @returns {void}
+ * 
+ * @example
+ * // Usage in select onChange handler
+ * <select id="weatherUnitContainer" onChange={changeWeatherUnit}>
+ *   <option value="0">Metric (°C)</option>
+ *   <option value="1">Default (K)</option>
+ *   <option value="2">Imperial (°F)</option>
+ * </select>
+ */
 export const changeWeatherUnit = (e) => {
 	jQuery(($) => {
 		e.preventDefault();
@@ -115,38 +182,16 @@ export const changeWeatherUnit = (e) => {
 				break;
 			
 			default:
-				Swal.fire({
-					toast:true,
-					text:"Select a valid unit",
-					icon:"warning",
-					timer:1000,
-					position:"top",
-					showConfirmButton:false,
-					
-				})
+				showWarning("Select a valid unit", 1000);
 				break;
 		}
-		//check if valuex exists in the DB
+		// Check if value exists in the DB
 		if(db.get("WEATHER_UNIT")){
 			db.update("WEATHER_UNIT",unitToStore);
-			Swal.fire({
-				toast:true,
-				text:"Weather unit updated successfully",
-				icon:"success",
-				timer:1500,
-				position:"top",
-				showConfirmButton:false
-			})
+			showSuccess("Weather unit updated successfully", 1500);
 		}else{
 			db.create("WEATHER_UNIT",unitToStore);
-			Swal.fire({
-				toast:true,
-				text:"Weather unit stored successfully",
-				icon:"info",
-				timer:1500,
-				position:"top",
-				showConfirmButton:false
-			})
+			showInfo("Weather unit stored successfully", 1500);
 		}
 	});
 };
