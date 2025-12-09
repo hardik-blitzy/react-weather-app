@@ -1,7 +1,7 @@
 import jQuery from "jquery";
 import { db } from "../backend/app_backend";
 import { getCurrentDate } from "../inc/scripts/utilities";
-import Swal from "sweetalert2";
+import { showSuccess, showError, showWarning, showInfo } from "../utils/toastHelper";
 import Thunder from "./../assets/static/thunder.svg";
 import Day from "./../assets/static/day.svg";
 import Drizzle from "./../assets/static/rainy-5.svg";
@@ -64,14 +64,7 @@ export const handleWeatherForm = (e, search) => {
 	e.preventDefault();
 
 	if (db.get("TRACK_SAVED_LOCATION_WEATHER") === "false") {
-		Swal.fire({
-			text: "Changes settings to track default location",
-			icon: "info",
-			timer: 1500,
-			toast: true,
-			showConfirmButton: false,
-			position: "top",
-		}).then((willProceed) => {
+		showInfo("Changes settings to track default location", 1500).then((willProceed) => {
 			scrollToElement("weatherContainer");
 		});
 	}
@@ -88,14 +81,7 @@ export const handleWeatherForm = (e, search) => {
 
 export const findCity = (searchTerm,updateDataArray)=> {
 	if (db.get("TRACK_SAVED_LOCATION_WEATHER") === "false") {
-		Swal.fire({
-			text: "Changes settings to track default location",
-			icon: "info",
-			timer: 1500,
-			toast: true,
-			showConfirmButton: false,
-			position: "top",
-		}).then((willProceed) => {
+		showInfo("Changes settings to track default location", 1500).then((willProceed) => {
 			scrollToElement("weatherContainer");
 		});
 	}
@@ -111,14 +97,7 @@ export const findCity = (searchTerm,updateDataArray)=> {
 			},
 			success: (result, status, xhr) => {
 				if (xhr.status !== 200) {
-					Swal.fire({
-						toast: true,
-						position: "top",
-						text: "Something went wrong!",
-						icon: "info",
-						showConfirmButton: false,
-						timer: 1000,
-					});
+					showError("Something went wrong!", 1000);
 				} else {
 					//check if the API returned a legit response
 					console.log(result)
@@ -132,26 +111,12 @@ export const findCity = (searchTerm,updateDataArray)=> {
 
 				//check if the error is empty
 				if (error === "") {
-					Swal.fire({
-						toast: true,
-						text: "Network Error!",
-						icon: "info",
-						timer: 1000,
-						position: "top",
-						showConfirmButton: false,
-					}).then((willProceed) => {
+					showError("Network Error!", 1000).then((willProceed) => {
 						//scroll to top when the promise is resolved!
 						scrollToElement("weatherContainer");
 					});
 				} else {
-					Swal.fire({
-						toast: true,
-						text: error,
-						icon: "warning",
-						timer: 1000,
-						position: "top",
-						showConfirmButton: false,
-					}).then((willProceed) => {
+					showWarning(error, 1000).then((willProceed) => {
 						//scroll to top when the promise is resolved!
 						scrollToElement("weatherContainer");
 					});
@@ -244,14 +209,7 @@ export const getCurrentWeather = (location) => {
 			processData: false,
 			success: (result, status, xhr) => {
 				if (xhr.status !== 200) {
-					Swal.fire({
-						toast: true,
-						position: "top",
-						text: "Something went wrong!",
-						icon: "info",
-						showConfirmButton: false,
-						timer: 1000,
-					});
+					showError("Something went wrong!", 1000);
 				} else {
 					//check if the API returned a legit response
 					if (result.cod === 200) {
@@ -266,26 +224,12 @@ export const getCurrentWeather = (location) => {
 
 				//check if the error is empty
 				if (error === "") {
-					Swal.fire({
-						toast: true,
-						text: "Network Error!",
-						icon: "info",
-						timer: 1000,
-						position: "top",
-						showConfirmButton: false,
-					}).then((willProceed) => {
+					showError("Network Error!", 1000).then((willProceed) => {
 						//scroll to top when the promise is resolved!
 						scrollToElement("weatherContainer");
 					});
 				} else {
-					Swal.fire({
-						toast: true,
-						text: error,
-						icon: "warning",
-						timer: 1000,
-						position: "top",
-						showConfirmButton: false,
-					}).then((willProceed) => {
+					showWarning(error, 1000).then((willProceed) => {
 						//scroll to top when the promise is resolved!
 						scrollToElement("weatherContainer");
 					});
