@@ -1,7 +1,7 @@
 import jQuery from "jquery";
 import { db } from "../backend/app_backend";
 import { getCurrentDate } from "../inc/scripts/utilities";
-import { showSuccess, showError, showWarning, showInfo } from "../utils/toastHelper";
+import { showError, showWarning, showInfo } from "../utils/toastHelper";
 import Thunder from "./../assets/static/thunder.svg";
 import Day from "./../assets/static/day.svg";
 import Drizzle from "./../assets/static/rainy-5.svg";
