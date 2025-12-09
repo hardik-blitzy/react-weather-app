@@ -42,7 +42,7 @@ export const saveLocation = (e) => {
 		const $defaultLocation = $("#defaultLocation").val().trim();
 
 		// Check if the location is empty
-		if ($defaultLocation === undefined || $defaultLocation == "") {
+		if ($defaultLocation === undefined || $defaultLocation === "") {
 			showError("Please enter a valid location", 4000);
 		} else {
 			db.update("USER_DEFAULT_LOCATION", $defaultLocation);
