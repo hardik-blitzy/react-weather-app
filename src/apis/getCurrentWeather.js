@@ -87,7 +87,6 @@ export const findCity = (searchTerm,updateDataArray)=> {
 	}
 	const XAPIKEY = "lNhOELJHDMrwCwm40hFvwA==teZv2EboEGJfonOC";
 	jQuery(($)=>{
-		console.log("Ajax sent")
 		$.ajax({
 			url: `https://api.api-ninjas.com/v1/city?name=${searchTerm}&limit=4`,
 			processData: false,
@@ -100,14 +99,12 @@ export const findCity = (searchTerm,updateDataArray)=> {
 					showError("Something went wrong!", 1000);
 				} else {
 					//check if the API returned a legit response
-					console.log(result)
 					updateDataArray(result)
 				}
 			},
 			error: (xhr, status, error) => {
 				$("#searchWeather").val(" ");
 				closeUtilityComponent();
-				console.log("Error")
 
 				//check if the error is empty
 				if (error === "") {

@@ -52,7 +52,6 @@ const ForecastWeather = () => {
 				$user_city == null && $user_latitude == null &&
 				$user_longitude == null
 			) {
-				console.log(typeof $user_city);
 				// Display error toast for missing location - no callback needed
 				showError("No saved location found!");
 			} else if (
