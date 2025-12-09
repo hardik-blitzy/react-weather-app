@@ -1,29 +1,34 @@
 import React, { useState, useEffect } from "react";
 import Footer from "../components/footer";
 import navigate from "../inc/scripts/utilities";
-import Spinner from "../components/spinner";
+// Spinner import commented - not used in current implementation
+// import Spinner from "../components/spinner";
 import Button from "./../components/button";
 import jQuery from "jquery";
 import { db } from "../backend/app_backend";
-import { getCurrentDate } from "../inc/scripts/utilities";
+// getCurrentDate import commented - not used in current implementation
+// import { getCurrentDate } from "../inc/scripts/utilities";
 import * as currentWeather from "./../apis/getCurrentWeather";
-import HumidityIcon from "./../assets/humidity-icon.svg";
-import WindIcon from "./../assets/wind-icon.svg";
-import PressureIcon from "./../assets/pressure-icon.svg";
+// Weather icon imports commented - not used in current implementation
+// import HumidityIcon from "./../assets/humidity-icon.svg";
+// import WindIcon from "./../assets/wind-icon.svg";
+// import PressureIcon from "./../assets/pressure-icon.svg";
 import ForecastDailyWeatherComponent from "./../components/forecastWeatherComponent";
 import Swal from "sweetalert2";
-import Thunder from "./../assets/static/thunder.svg";
-import Day from "./../assets/static/day.svg";
-import Drizzle from "./../assets/static/rainy-5.svg";
-import Rainy from "./../assets/static/rainy-7.svg";
-import Snowy from "./../assets/static/snowy-6.svg";
-import FreezingRain from "./../assets/static/freezing-rain.svg";
-import Misty from "./../assets/static/mist.svg";
-import BrokenClouds from "./../assets/static/broken-clouds.svg";
-import OvercastClouds from "./../assets/static/overcast-clouds.svg";
-import ScatteredClouds from "./../assets/static/scattered-clouds.svg";
-import FewClouds from "./../assets/static/few-clouds.svg";
-import Haze from "./../assets/static/haze.svg";
+// Weather SVG icon imports commented - not used in current implementation
+// These icons may be used for future weather condition visualizations
+// import Thunder from "./../assets/static/thunder.svg";
+// import Day from "./../assets/static/day.svg";
+// import Drizzle from "./../assets/static/rainy-5.svg";
+// import Rainy from "./../assets/static/rainy-7.svg";
+// import Snowy from "./../assets/static/snowy-6.svg";
+// import FreezingRain from "./../assets/static/freezing-rain.svg";
+// import Misty from "./../assets/static/mist.svg";
+// import BrokenClouds from "./../assets/static/broken-clouds.svg";
+// import OvercastClouds from "./../assets/static/overcast-clouds.svg";
+// import ScatteredClouds from "./../assets/static/scattered-clouds.svg";
+// import FewClouds from "./../assets/static/few-clouds.svg";
+// import Haze from "./../assets/static/haze.svg";
 import * as utilis from "./../inc/scripts/utilities";
 const ForecastWeather = () => {
 	//check if the user navigated from the home page
@@ -70,14 +75,14 @@ const ForecastWeather = () => {
 			$.ajax({
 				url: FORECAST_URL,
 				success: (result, status, xhr) => {
-					if (result.cod == 200) {
+					if (result.cod === "200" || result.cod === 200) {
 						setForecastData(result);
 					}
 				},
 
 				error: (xhr, status, error) => {
 					//check if the error is empty
-					if (error == "") {
+					if (error === "") {
 						Swal.fire({
 							toast: true,
 							text: "Network Error!",

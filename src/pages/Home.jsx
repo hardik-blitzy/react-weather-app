@@ -32,7 +32,7 @@ const Home = () => {
           $.noConflict();
           const $defaultLocation = $("#defaultLocation").val().trim();
 
-          if ($defaultLocation === undefined || $defaultLocation == "") {
+          if ($defaultLocation === undefined || $defaultLocation === "") {
             Swal.fire({
               title: "Invalid Location!",
               html: "<p class=' text-center text-danger'>Please enter a valid location</p>",

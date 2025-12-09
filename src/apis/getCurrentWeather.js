@@ -6,7 +6,7 @@ import Thunder from "./../assets/static/thunder.svg";
 import Day from "./../assets/static/day.svg";
 import Drizzle from "./../assets/static/rainy-5.svg";
 import Rainy from "./../assets/static/rainy-7.svg";
-import Snowy from "./../assets/static/snowy-6.svg";
+// Snowy import removed - not currently used in weather code mapping
 import FreezingRain from "./../assets/static/freezing-rain.svg";
 import Misty from "./../assets/static/mist.svg";
 import BrokenClouds from "./../assets/static/broken-clouds.svg";
@@ -63,7 +63,7 @@ export const checkWeatherUnitDeg = () => {
 export const handleWeatherForm = (e, search) => {
 	e.preventDefault();
 
-	if (db.get("TRACK_SAVED_LOCATION_WEATHER") == "false") {
+	if (db.get("TRACK_SAVED_LOCATION_WEATHER") === "false") {
 		Swal.fire({
 			text: "Changes settings to track default location",
 			icon: "info",
@@ -87,7 +87,7 @@ export const handleWeatherForm = (e, search) => {
 };
 
 export const findCity = (searchTerm,updateDataArray)=> {
-	if (db.get("TRACK_SAVED_LOCATION_WEATHER") == "false") {
+	if (db.get("TRACK_SAVED_LOCATION_WEATHER") === "false") {
 		Swal.fire({
 			text: "Changes settings to track default location",
 			icon: "info",
@@ -110,7 +110,7 @@ export const findCity = (searchTerm,updateDataArray)=> {
 				'X-Api-Key':XAPIKEY
 			},
 			success: (result, status, xhr) => {
-				if (xhr.status != 200) {
+				if (xhr.status !== 200) {
 					Swal.fire({
 						toast: true,
 						position: "top",
@@ -131,7 +131,7 @@ export const findCity = (searchTerm,updateDataArray)=> {
 				console.log("Error")
 
 				//check if the error is empty
-				if (error == "") {
+				if (error === "") {
 					Swal.fire({
 						toast: true,
 						text: "Network Error!",
@@ -169,32 +169,32 @@ export const checkWeatherCode = (code) => {
 	if (code >= 200 && !(code >= 300)) {
 		//Thunder weather status
 		weatherSvg = Thunder;
-	} else if (code >= 300 && !(code != 400)) {
+	} else if (code >= 300 && !(code !== 400)) {
 		//Drizzle weather status
 		weatherSvg = Drizzle;
-	} else if (code >= 500 && code != 511 && !(code >= 600)) {
+	} else if (code >= 500 && code !== 511 && !(code >= 600)) {
 		//Rainy weather status
 		weatherSvg = Rainy;
-	} else if (code >= 700 && code != 701 && !(code >= 800)) {
+	} else if (code >= 700 && code !== 701 && !(code >= 800)) {
 		//Mist weather status
 		weatherSvg = Haze;
-	} else if (code == 701) {
+	} else if (code === 701) {
 		weatherSvg = Misty;
-	} else if (code == 511) {
+	} else if (code === 511) {
 		//Freezing rain weather status
 		weatherSvg = FreezingRain;
-	} else if (code == 800) {
+	} else if (code === 800) {
 		weatherSvg = Day;
-	} else if (code == 803) {
+	} else if (code === 803) {
 		//Broken clouds
 		weatherSvg = BrokenClouds;
-	} else if (code == 804) {
+	} else if (code === 804) {
 		//overcast clouds
 		weatherSvg = OvercastClouds;
-	} else if (code == 801) {
+	} else if (code === 801) {
 		//few clouds
 		weatherSvg = FewClouds;
-	} else if (code == 802) {
+	} else if (code === 802) {
 		//few clouds
 		weatherSvg = ScatteredClouds;
 	} else {
@@ -243,7 +243,7 @@ export const getCurrentWeather = (location) => {
 			url: SEARCH_URL,
 			processData: false,
 			success: (result, status, xhr) => {
-				if (xhr.status != 200) {
+				if (xhr.status !== 200) {
 					Swal.fire({
 						toast: true,
 						position: "top",
@@ -265,7 +265,7 @@ export const getCurrentWeather = (location) => {
 				closeUtilityComponent();
 
 				//check if the error is empty
-				if (error == "") {
+				if (error === "") {
 					Swal.fire({
 						toast: true,
 						text: "Network Error!",

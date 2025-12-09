@@ -44,7 +44,7 @@ const getGeolocation = () => {
 							url: URL,
 							processData: false,
 							success: (result, status, xhr) => {
-								if (xhr.status != 200) {
+								if (xhr.status !== 200) {
 									Swal.fire({
 										toast: true,
 										position: "top",
@@ -59,7 +59,7 @@ const getGeolocation = () => {
 									})
 								} else {
 									//if API call was successful
-									if (result.cod == 200) {
+									if (result.cod === 200) {
 										weatherAPI.updateReactDom(result);
 										weatherAPI.scrollToElement("weatherContainer");
 									}
