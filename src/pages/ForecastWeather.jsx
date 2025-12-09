@@ -14,7 +14,7 @@ import * as currentWeather from "./../apis/getCurrentWeather";
 // import WindIcon from "./../assets/wind-icon.svg";
 // import PressureIcon from "./../assets/pressure-icon.svg";
 import ForecastDailyWeatherComponent from "./../components/forecastWeatherComponent";
-import Swal from "sweetalert2";
+import { showError, showInfo } from "../utils/toastHelper";
 // Weather SVG icon imports commented - not used in current implementation
 // These icons may be used for future weather condition visualizations
 // import Thunder from "./../assets/static/thunder.svg";
@@ -53,16 +53,8 @@ const ForecastWeather = () => {
 				$user_longitude == null
 			) {
 				console.log(typeof $user_city);
-				Swal.fire({
-					text: "No saved location found!",
-					icon: "error",
-					timer: 3000,
-					toast: true,
-					showConfirmButton: false,
-					position: "top",
-				}).then((willProceed) => {
-					return;
-				});
+				// Display error toast for missing location - no callback needed
+				showError("No saved location found!");
 			} else if (
 				$user_city == null &&
 				$user_latitude != null &&
@@ -83,26 +75,14 @@ const ForecastWeather = () => {
 				error: (xhr, status, error) => {
 					//check if the error is empty
 					if (error === "") {
-						Swal.fire({
-							toast: true,
-							text: "Network Error!",
-							icon: "info",
-							timer: 1000,
-							position: "top",
-							showConfirmButton: false,
-						}).then((willProceed) => {
+						// Network error - use info toast with scroll callback
+						showInfo("Network Error!", 1000).then(() => {
 							//scroll to top when the promise is resolved!
 							currentWeather.scrollToElement("forecastPage");
 						});
 					} else {
-						Swal.fire({
-							toast: true,
-							text: error,
-							icon: "warning",
-							timer: 1000,
-							position: "top",
-							showConfirmButton: false,
-						}).then((willProceed) => {
+						// Dynamic error message - use error toast with scroll callback
+						showError(error, 1000).then(() => {
 							//scroll to top when the promise is resolved!
 							currentWeather.scrollToElement("forecastPage");
 						});
@@ -167,17 +147,9 @@ const ForecastWeather = () => {
 
 		//map each of the individual objects into single component!
 		const firstWeatherDataForecast = outputArray.map((data, index) => {
+			// Display weather details info toast
 			const giveMoreDetails = () => {
-				Swal.fire({
-					text: data.title,
-					toast: true,
-					position: "top",
-					timer: 3000,
-					showConfirmButton: false,
-					icon: "info",
-				}).then((willProceed) => {
-					return;
-				});
+				showInfo(data.title, 3000);
 			};
 			return (
 				<ForecastDailyWeatherComponent
@@ -214,17 +186,9 @@ const ForecastWeather = () => {
 
 		//map each of the individual objects into single component!
 		const secondWeatherDataForecast = outputArray.map((data, index) => {
+			// Display weather details info toast
 			const giveMoreDetails = () => {
-				Swal.fire({
-					text: data.title,
-					toast: true,
-					position: "top",
-					timer: 3000,
-					showConfirmButton: false,
-					icon: "info",
-				}).then((willProceed) => {
-					return;
-				});
+				showInfo(data.title, 3000);
 			};
 			return (
 				<ForecastDailyWeatherComponent
@@ -261,17 +225,9 @@ const ForecastWeather = () => {
 
 		//map each of the individual objects into single component!
 		const thirdWeatherDataForecast = outputArray.map((data, index) => {
+			// Display weather details info toast
 			const giveMoreDetails = () => {
-				Swal.fire({
-					text: data.title,
-					toast: true,
-					position: "top",
-					timer: 3000,
-					showConfirmButton: false,
-					icon: "info",
-				}).then((willProceed) => {
-					return;
-				});
+				showInfo(data.title, 3000);
 			};
 			return (
 				<ForecastDailyWeatherComponent
@@ -308,17 +264,9 @@ const ForecastWeather = () => {
 
 		//map each of the individual objects into single component!
 		const forthWeatherDataForecast = outputArray.map((data, index) => {
+			// Display weather details info toast
 			const giveMoreDetails = () => {
-				Swal.fire({
-					text: data.title,
-					toast: true,
-					position: "top",
-					timer: 3000,
-					showConfirmButton: false,
-					icon: "info",
-				}).then((willProceed) => {
-					return;
-				});
+				showInfo(data.title, 3000);
 			};
 			return (
 				<ForecastDailyWeatherComponent
@@ -355,17 +303,9 @@ const ForecastWeather = () => {
 
 		//map each of the individual objects into single component!
 		const fifthWeatherDataForecast = outputArray.map((data, index) => {
+			// Display weather details info toast
 			const giveMoreDetails = () => {
-				Swal.fire({
-					text: data.title,
-					toast: true,
-					position: "top",
-					timer: 3000,
-					showConfirmButton: false,
-					icon: "info",
-				}).then((willProceed) => {
-					return;
-				});
+				showInfo(data.title, 3000);
 			};
 			return (
 				<ForecastDailyWeatherComponent
