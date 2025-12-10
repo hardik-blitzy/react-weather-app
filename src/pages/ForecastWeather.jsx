@@ -18,59 +18,79 @@ import * as currentWeather from "./../apis/getCurrentWeather";
 import ForecastDailyWeatherComponent from "./../components/forecastWeatherComponent";
 import { showError, showInfo } from "../utils/toastHelper";
 import * as utilis from "./../inc/scripts/utilities";
+
+/**
+ * OpenWeatherMap API configuration
+ * @constant {string} API_KEY - API key for OpenWeatherMap services
+ */
+const API_KEY = "cd34f692e856e493bd936095b256b337";
+
+/**
+ * Weather data template class for structuring forecast information
+ * Encapsulates weather data for a single time interval
+ */
+class WeatherTemplate {
+	constructor(id, time, icon, unit, title) {
+		this.id = id;
+		this.time = time;
+		this.icon = icon;
+		this.unit = unit;
+		this.title = title;
+	}
+}
+
 const ForecastWeather = () => {
-	//check if the user navigated from the home page
+	// Redirect to home if user hasn't completed initial setup
 	if (!db.get("HOME_PAGE_SEEN")) {
 		navigate("/");
 	}
-	//holds the current component to insert into the utility footer component
+
+	// State for utility footer component insertion
 	const [componentToInsert, setComponentToInsert] = useState("");
+	// State for forecast API response data
 	const [forecastData, setForecastData] = useState(null);
 
+	/**
+	 * Fetches forecast data from OpenWeatherMap API on component mount.
+	 * Constructs URL based on available user location data (city name or coordinates).
+	 */
 	useEffect(() => {
 		jQuery(($) => {
 			$.noConflict();
-			const $API_KEY = "cd34f692e856e493bd936095b256b337";
-			const $WEATHER_UNIT = db.get("WEATHER_UNIT") || "metric";
-			const $user_city = db.get("USER_DEFAULT_LOCATION");
-			const $user_latitude = db.get("USER_LATITUDE");
-			const $user_longitude = db.get("USER_LONGITUDE");
-			let FORECAST_URL;
-			if (
-				$user_city == null && $user_latitude == null &&
-				$user_longitude == null
-			) {
-				// Display error toast for missing location - no callback needed
+			const weatherUnit = db.get("WEATHER_UNIT") || "metric";
+			const userCity = db.get("USER_DEFAULT_LOCATION");
+			const userLatitude = db.get("USER_LATITUDE");
+			const userLongitude = db.get("USER_LONGITUDE");
+			
+			// Build forecast URL based on available location data
+			let forecastUrl;
+			if (userCity === null && userLatitude === null && userLongitude === null) {
+				// No location data available - display error toast
 				showError("No saved location found!");
-			} else if (
-				$user_city == null &&
-				$user_latitude != null &&
-				$user_longitude != null
-			) {
-				FORECAST_URL = `https://api.openweathermap.org/data/2.5/forecast?lat=${$user_latitude}&lon=${$user_longitude}&appid=${$API_KEY}&units=${$WEATHER_UNIT}`;
+				return;
+			} else if (userCity === null && userLatitude !== null && userLongitude !== null) {
+				// Use coordinates when city name is not available
+				forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?lat=${userLatitude}&lon=${userLongitude}&appid=${API_KEY}&units=${weatherUnit}`;
 			} else {
-				FORECAST_URL = `https://api.openweathermap.org/data/2.5/forecast?q=${$user_city}&appid=${$API_KEY}&units=${$WEATHER_UNIT}`;
+				// Prefer city name for location query
+				forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${userCity}&appid=${API_KEY}&units=${weatherUnit}`;
 			}
+
 			$.ajax({
-				url: FORECAST_URL,
+				url: forecastUrl,
 				success: (result, status, xhr) => {
 					if (result.cod === "200" || result.cod === 200) {
 						setForecastData(result);
 					}
 				},
-
 				error: (xhr, status, error) => {
-					//check if the error is empty
+					// Handle network errors vs API errors differently
 					if (error === "") {
-						// Network error - use info toast with scroll callback
 						showInfo("Network Error!", 1000).then(() => {
-							//scroll to top when the promise is resolved!
 							currentWeather.scrollToElement("forecastPage");
 						});
 					} else {
-						// Dynamic error message - use error toast with scroll callback
 						showError(error, 1000).then(() => {
-							//scroll to top when the promise is resolved!
 							currentWeather.scrollToElement("forecastPage");
 						});
 					}
@@ -79,6 +99,9 @@ const ForecastWeather = () => {
 		});
 	}, []);
 
+	/**
+	 * Toggles visibility of the utility component overlay
+	 */
 	const addUtilityComponentHeight = () => {
 		jQuery(($) => {
 			$.noConflict();
@@ -86,58 +109,50 @@ const ForecastWeather = () => {
 			$(".utility-component").toggleClass("add-utility-component-height");
 		});
 	};
-	class WeatherTemplate {
-		constructor(id, time, icon, unit, title) {
-			this.id = id;
-			this.time = time;
-			this.icon = icon;
-			this.unit = unit;
-			this.title = title;
-		}
-	}
 
-	//first day weather mapping
-	const mapFirstDayData = (result) => {
-		//first day data is from array 0-8
-		let outputArray = [];
+	/**
+	 * Generic function to map forecast data for a specific day range.
+	 * Follows DRY principle by consolidating duplicate mapping logic.
+	 * 
+	 * @param {Object} result - API response containing forecast list
+	 * @param {number} startIndex - Start index in the forecast list array
+	 * @param {number} endIndex - End index in the forecast list array (exclusive)
+	 * @param {boolean} [shouldCache=false] - Whether to cache values to database (only for day 1)
+	 * @returns {JSX.Element[]} Array of ForecastDailyWeatherComponent elements
+	 */
+	const mapDayData = (result, startIndex, endIndex, shouldCache = false) => {
+		const outputArray = [];
 
-		for (let i = 0; i < 8; i++) {
+		for (let i = startIndex; i < endIndex; i++) {
+			const forecastItem = result.list[i];
+			const time = utilis.convertTo12Hour(utilis.getTimeFromDateString(forecastItem.dt_txt));
+			const weatherCode = forecastItem.weather[0].id;
+			const temp = Math.ceil(forecastItem.main.temp);
+			const description = forecastItem.weather[0].description;
+
 			outputArray.push(
 				new WeatherTemplate(
 					i,
-					utilis.convertTo12Hour(
-						utilis.getTimeFromDateString(result.list[i].dt_txt)
-					),
-					currentWeather.checkWeatherCode(result.list[i].weather[0].id),
-					Math.ceil(result.list[i].main.temp),
-					result.list[i].weather[0].description
+					time,
+					currentWeather.checkWeatherCode(weatherCode),
+					temp,
+					description
 				)
 			);
 
-			//save the first values into the database for reference @ the home screen
-			db.create(
-				`WEATHER_FORECAST_TIME_${i}`,
-				`${utilis.convertTo12Hour(
-					utilis.getTimeFromDateString(result.list[i].dt_txt)
-				)}`
-			);
-			db.create(`WEATHER_FORECAST_ICON_${i}`, `${result.list[i].weather[0].id}`);
-			db.create(
-				`WEATHER_FORECAST_UNIT_${i}`,
-				`${Math.ceil(result.list[i].main.temp)}`
-			);
-			db.create(
-				`WEATHER_FORECAST_TITLE_${i}`,
-				`${result.list[i].weather[0].description}`
-			);
+			// Cache first day values for home screen reference
+			if (shouldCache) {
+				const cacheIndex = i - startIndex;
+				db.create(`WEATHER_FORECAST_TIME_${cacheIndex}`, time);
+				db.create(`WEATHER_FORECAST_ICON_${cacheIndex}`, `${weatherCode}`);
+				db.create(`WEATHER_FORECAST_UNIT_${cacheIndex}`, `${temp}`);
+				db.create(`WEATHER_FORECAST_TITLE_${cacheIndex}`, description);
+			}
 		}
 
-		//map each of the individual objects into single component!
-		const firstWeatherDataForecast = outputArray.map((data, index) => {
-			// Display weather details info toast
-			const giveMoreDetails = () => {
-				showInfo(data.title, 3000);
-			};
+		// Map weather data to UI components
+		return outputArray.map((data) => {
+			const giveMoreDetails = () => showInfo(data.title, 3000);
 			return (
 				<ForecastDailyWeatherComponent
 					key={data.id}
@@ -148,204 +163,85 @@ const ForecastWeather = () => {
 				/>
 			);
 		});
-
-		return firstWeatherDataForecast;
 	};
 
-	//second data mapping
-	const mapSecondDayData = (result) => {
-		//first day data is from array 8-16
-		let outputArray = [];
+	/**
+	 * Convenience wrapper functions for each day's forecast mapping.
+	 * Day 1 includes caching for home screen display.
+	 */
+	const mapFirstDayData = (result) => mapDayData(result, 0, 8, true);
+	const mapSecondDayData = (result) => mapDayData(result, 8, 16);
+	const mapThirdDayData = (result) => mapDayData(result, 16, 24);
+	const mapFourthDayData = (result) => mapDayData(result, 24, 32);
+	const mapFifthDayData = (result) => mapDayData(result, 32, 40);
 
-		for (let i = 8; i < 16; i++) {
-			outputArray.push(
-				new WeatherTemplate(
-					i,
-					utilis.convertTo12Hour(
-						utilis.getTimeFromDateString(result.list[i].dt_txt)
-					),
-					currentWeather.checkWeatherCode(result.list[i].weather[0].id),
-					Math.ceil(result.list[i].main.temp),
-					result.list[i].weather[0].description
-				)
-			);
-		}
-
-		//map each of the individual objects into single component!
-		const secondWeatherDataForecast = outputArray.map((data, index) => {
-			// Display weather details info toast
-			const giveMoreDetails = () => {
-				showInfo(data.title, 3000);
-			};
-			return (
-				<ForecastDailyWeatherComponent
-					key={data.id}
-					time={data.time}
-					icon={data.icon}
-					weatherUnit={data.unit}
-					onClick={giveMoreDetails}
-				/>
-			);
-		});
-
-		return secondWeatherDataForecast;
-	};
-
-	//third data mapping
-	const mapThirdDayData = (result) => {
-		//first day data is from array 16-24
-		let outputArray = [];
-
-		for (let i = 16; i < 24; i++) {
-			outputArray.push(
-				new WeatherTemplate(
-					i,
-					utilis.convertTo12Hour(
-						utilis.getTimeFromDateString(result.list[i].dt_txt)
-					),
-					currentWeather.checkWeatherCode(result.list[i].weather[0].id),
-					Math.ceil(result.list[i].main.temp),
-					result.list[i].weather[0].description
-				)
-			);
-		}
-
-		//map each of the individual objects into single component!
-		const thirdWeatherDataForecast = outputArray.map((data, index) => {
-			// Display weather details info toast
-			const giveMoreDetails = () => {
-				showInfo(data.title, 3000);
-			};
-			return (
-				<ForecastDailyWeatherComponent
-					key={data.id}
-					time={data.time}
-					icon={data.icon}
-					weatherUnit={data.unit}
-					onClick={giveMoreDetails}
-				/>
-			);
-		});
-
-		return thirdWeatherDataForecast;
-	};
-
-	//fourth data mapping
-	const mapFourthDayData = (result) => {
-		//first day data is from array 24-32
-		let outputArray = [];
-
-		for (let i = 24; i < 32; i++) {
-			outputArray.push(
-				new WeatherTemplate(
-					i,
-					utilis.convertTo12Hour(
-						utilis.getTimeFromDateString(result.list[i].dt_txt)
-					),
-					currentWeather.checkWeatherCode(result.list[i].weather[0].id),
-					Math.ceil(result.list[i].main.temp),
-					result.list[i].weather[0].description
-				)
-			);
-		}
-
-		//map each of the individual objects into single component!
-		const forthWeatherDataForecast = outputArray.map((data, index) => {
-			// Display weather details info toast
-			const giveMoreDetails = () => {
-				showInfo(data.title, 3000);
-			};
-			return (
-				<ForecastDailyWeatherComponent
-					key={data.id}
-					time={data.time}
-					icon={data.icon}
-					weatherUnit={data.unit}
-					onClick={giveMoreDetails}
-				/>
-			);
-		});
-
-		return forthWeatherDataForecast;
-	};
-
-	//fifth data mapping
-	const mapFifthDayData = (result) => {
-		//first day data is from array 32-40
-		let outputArray = [];
-
-		for (let i = 32; i < 40; i++) {
-			outputArray.push(
-				new WeatherTemplate(
-					i,
-					utilis.convertTo12Hour(
-						utilis.getTimeFromDateString(result.list[i].dt_txt)
-					),
-					currentWeather.checkWeatherCode(result.list[i].weather[0].id),
-					Math.ceil(result.list[i].main.temp),
-					result.list[i].weather[0].description
-				)
-			);
-		}
-
-		//map each of the individual objects into single component!
-		const fifthWeatherDataForecast = outputArray.map((data, index) => {
-			// Display weather details info toast
-			const giveMoreDetails = () => {
-				showInfo(data.title, 3000);
-			};
-			return (
-				<ForecastDailyWeatherComponent
-					key={data.id}
-					time={data.time}
-					icon={data.icon}
-					weatherUnit={data.unit}
-					onClick={giveMoreDetails}
-				/>
-			);
-		});
-
-		return fifthWeatherDataForecast;
-	};
-
-	const navigateToApp = () => {
+	/**
+	 * Navigates user back to the main weather view
+	 */
+	const navigateToWeather = () => {
 		navigate("/weather");
 	};
-	//create the main weather component forecast tags
-	const MainWeatherComponent = () => {
-		return (
-			<section className="d-flex align-items-center justify-content-center">
-				<Button
-					text="current weather forecast"
-					className="shadow brand-btn-2 toggle-width-3 my-5 "
-					onClick={navigateToApp}
-				/>
-			</section>
-		);
-	};
 
-	//function to check if the dashboard icon was clicked
+	/**
+	 * Main Weather Component - displays navigation button to current weather
+	 * Used in the utility footer overlay
+	 */
+	const MainWeatherComponent = () => (
+		<section className="d-flex align-items-center justify-content-center">
+			<Button
+				text="current weather forecast"
+				className="shadow brand-btn-2 toggle-width-3 my-5"
+				onClick={navigateToWeather}
+			/>
+		</section>
+	);
+
+	/**
+	 * Shows the main weather component in the utility footer overlay
+	 */
 	const showMainWeatherComponent = () => {
 		addUtilityComponentHeight();
-		//change the variable to hold the current component to insert
 		setComponentToInsert(<MainWeatherComponent />);
 	};
 
-	const navigateHome = () => {
-		navigate("/weather");
-	};
+	/**
+	 * Reusable component for displaying a single day's forecast section.
+	 * Follows DRY principle by eliminating duplicate JSX for each day.
+	 * 
+	 * @param {Object} props - Component props
+	 * @param {number} props.dayNumber - Day number (1-5)
+	 * @param {Function} props.mapFunction - Function to map forecast data for this day
+	 * @returns {JSX.Element} Day forecast section with header and hourly data
+	 */
+	const DayForecastSection = ({ dayNumber, mapFunction }) => (
+		<>
+			<section className={`day-${dayNumber}-container future-weather-days d-flex align-items-center justify-content-start`}>
+				<section className="today-section d-flex mx-2 flex-column align-items-center justify-content-center">
+					<p className="brand-small-text text-capitalize fw-bold">Day {dayNumber}</p>
+					<div className="future-weather-notch-active"></div>
+				</section>
+			</section>
+			<section
+				className={`day-${dayNumber}-weather future-weather-forecast my-4 d-flex align-items-center justify-content-between`}
+				style={{ overflowX: "scroll" }}>
+				{forecastData !== null ? mapFunction(forecastData) : "loading.."}
+			</section>
+			<br />
+		</>
+	);
 
 	return (
 		<React.Fragment>
 			
 			<section className="container-fluid width-toggle-5 m-auto" id="forecastPage">
 				<section className="app-header d-flex justify-content-between">
+					{/* Back navigation button - returns to main weather view */}
 					<div className="toggle-btn my-3">
 						<svg
 							height={"30"}
 							id="Layer_1"
 							version="1.1"
-							onClick={navigateHome}
+							onClick={navigateToWeather}
 							viewBox="0 0 512 512"
 							width={"30"}
 							xmlns="http://www.w3.org/2000/svg">
@@ -373,101 +269,25 @@ const ForecastWeather = () => {
 						</svg>
 					</div>
 				</section>
+				{/* Forecast Section Container - displays 5-day hourly predictions */}
 				<section className="my-1 next-week-component-container d-flex flex-column my-1">
 					<br />
+					{/* Section Header */}
 					<section className="d-flex align-items-center justify-content-between mb-2 flex-row-reverse">
 						<h6 className="fw-bold fs-6 my-3 text-start text-capitalize text-muted">
-							{" "}
 							Prediction
 						</h6>
-						<h6 className="fw-bold fs-6 my-3 text-start text-capitalize ">
+						<h6 className="fw-bold fs-6 my-3 text-start text-capitalize">
 							Hourly
 						</h6>
 					</section>
 
-					<section className="day-1-container future-weather-days d-flex align-items-center justify-content-start">
-						<section className="today-section d-flex mx-2 flex-column align-items-center justify-content-center">
-							<p className="brand-small-text text-capitalize fw-bold">Day 1</p>
-							<div className="future-weather-notch-active"></div>
-						</section>
-					</section>
-					<section
-						className="day-1-weather future-weather-forecast my-4 d-flex align-items-center justify-content-between "
-						style={{ overflowX: "scroll" }}>
-						{!(forecastData == null) ? (
-							mapFirstDayData(forecastData)
-						) : (
-							"loading.."
-						)}
-					</section>
-
-					<br />
-					<section className="day-2-container future-weather-days d-flex align-items-center justify-content-start">
-						<section className="today-section d-flex mx-2 flex-column align-items-center justify-content-center">
-							<p className="brand-small-text text-capitalize fw-bold">Day 2</p>
-							<div className="future-weather-notch-active"></div>
-						</section>
-					</section>
-					<section
-						className="day-2-weather future-weather-forecast my-4 d-flex align-items-center justify-content-between "
-						style={{ overflowX: "scroll" }}>
-						{!(forecastData == null) ? (
-							mapSecondDayData(forecastData)
-						) : (
-							"loading.."
-						)}
-					</section>
-
-					<br />
-					<section className="day-3-container future-weather-days d-flex align-items-center justify-content-start">
-						<section className="today-section d-flex mx-2 flex-column align-items-center justify-content-center">
-							<p className="brand-small-text text-capitalize fw-bold">Day 3</p>
-							<div className="future-weather-notch-active"></div>
-						</section>
-					</section>
-					<section
-						className="day-3-weather future-weather-forecast my-4 d-flex align-items-center justify-content-between "
-						style={{ overflowX: "scroll" }}>
-						{!(forecastData == null) ? (
-							mapThirdDayData(forecastData)
-						) : (
-							"loading.."
-						)}
-					</section>
-					<br />
-
-					<section className="day-4-container future-weather-days d-flex align-items-center justify-content-start">
-						<section className="today-section d-flex mx-2 flex-column align-items-center justify-content-center">
-							<p className="brand-small-text text-capitalize fw-bold">Day 4</p>
-							<div className="future-weather-notch-active"></div>
-						</section>
-					</section>
-					<section
-						className="day-4-weather future-weather-forecast my-4 d-flex align-items-center justify-content-between "
-						style={{ overflowX: "scroll" }}>
-						{!(forecastData == null) ? (
-							mapFourthDayData(forecastData)
-						) : (
-							"loading.."
-						)}
-					</section>
-					<br />
-					<section className="day-5-container future-weather-days d-flex align-items-center justify-content-start">
-						<section className="today-section d-flex mx-2 flex-column align-items-center justify-content-center">
-							<p className="brand-small-text text-capitalize fw-bold">Day 5</p>
-							<div className="future-weather-notch-active"></div>
-						</section>
-					</section>
-
-					<section
-						className="day-5-weather future-weather-forecast my-4 d-flex align-items-center justify-content-between "
-						style={{ overflowX: "scroll" }}>
-						{!(forecastData == null) ? (
-							mapFifthDayData(forecastData)
-						) : (
-							"loading.."
-						)}
-					</section>
+					{/* Day 1-5 Forecast Sections using DRY component pattern */}
+					<DayForecastSection dayNumber={1} mapFunction={mapFirstDayData} />
+					<DayForecastSection dayNumber={2} mapFunction={mapSecondDayData} />
+					<DayForecastSection dayNumber={3} mapFunction={mapThirdDayData} />
+					<DayForecastSection dayNumber={4} mapFunction={mapFourthDayData} />
+					<DayForecastSection dayNumber={5} mapFunction={mapFifthDayData} />
 				</section>
 
 				<Footer utilityTags={componentToInsert} />
