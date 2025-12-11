@@ -29,37 +29,63 @@ const Home = () => {
    * and initializes user preferences in the database.
    */
   function click() {
-    Swal.fire({
-      title: "Default Location",
-      html: "<input type='text' placeholder='Enter location' class='form-control border-1 p-3 brand-small-text w-100' id='defaultLocation'>",
-      confirmButtonText: "Save Location",
-      confirmButtonColor: "rgb(83, 166, 250)",
-      allowOutsideClick: false,
-      allowEscapeKey: false,
-      allowEnterKey: false,
-    }).then((willProceed) => {
-      if (willProceed.isConfirmed) {
-        jQuery(($) => {
-          $.noConflict();
-          const $defaultLocation = $("#defaultLocation").val().trim();
+    try {
+      Swal.fire({
+        title: "Default Location",
+        html: "<input type='text' placeholder='Enter location' class='form-control border-1 p-3 brand-small-text w-100' id='defaultLocation'>",
+        confirmButtonText: "Save Location",
+        confirmButtonColor: "rgb(83, 166, 250)",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        allowEnterKey: false,
+      }).then((willProceed) => {
+        try {
+          if (willProceed.isConfirmed) {
+            jQuery(($) => {
+              try {
+                $.noConflict();
+                const locationValue = $("#defaultLocation").val();
+                const $defaultLocation = locationValue ? locationValue.trim() : "";
 
-          if ($defaultLocation === undefined || $defaultLocation === "") {
-            // Validation failed - show error toast notification
-            showError("Please enter a valid location");
-          } else {
-            // Validation passed - show success toast and initialize user data
-            showSuccess("Location saved successfully!", 3000);
+                if ($defaultLocation === undefined || $defaultLocation === "") {
+                  // Validation failed - show error toast notification
+                  showError("Please enter a valid location");
+                } else {
+                  // Validation passed - show success toast and initialize user data
+                  showSuccess("Location saved successfully!", 3000);
 
-            // Initialize user preferences in the database
-            db.create("HOME_PAGE_SEEN", true);
-            db.create("USER_DEFAULT_LOCATION", $defaultLocation);
-            db.create("TRACK_SAVED_LOCATION_WEATHER", false);
-            db.create("WEATHER_UNIT", "metric");
-            navigate("weather");
+                  // Initialize user preferences in the database with error handling
+                  try {
+                    db.create("HOME_PAGE_SEEN", true);
+                    db.create("USER_DEFAULT_LOCATION", $defaultLocation);
+                    db.create("TRACK_SAVED_LOCATION_WEATHER", false);
+                    db.create("WEATHER_UNIT", "metric");
+                  } catch (dbError) {
+                    // Continue with navigation even if some db operations fail
+                    showError("Some settings may not have been saved.");
+                  }
+                  
+                  try {
+                    navigate("weather");
+                  } catch (navError) {
+                    // Fallback navigation
+                    window.location.href = "/weather";
+                  }
+                }
+              } catch (jqueryError) {
+                showError("Failed to save location. Please try again.");
+              }
+            });
           }
-        });
-      }
-    });
+        } catch (proceedError) {
+          showError("An error occurred. Please try again.");
+        }
+      }).catch((swalError) => {
+        showError("Failed to open location dialog. Please refresh the page.");
+      });
+    } catch (error) {
+      showError("An unexpected error occurred. Please refresh the page.");
+    }
   }
 
   return (

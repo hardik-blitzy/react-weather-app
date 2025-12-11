@@ -58,11 +58,16 @@ const Toast = Swal.mixin({
  * });
  */
 export const showSuccess = (message, timer = 2000) => {
-  return Toast.fire({
-    text: message,
-    icon: "success",
-    timer: timer,
-  });
+  try {
+    return Toast.fire({
+      text: message,
+      icon: "success",
+      timer: timer,
+    });
+  } catch (error) {
+    // Fallback: return resolved promise to prevent breaking promise chains
+    return Promise.resolve();
+  }
 };
 
 /**
@@ -95,11 +100,16 @@ export const showSuccess = (message, timer = 2000) => {
  * });
  */
 export const showError = (message, timer = 3000) => {
-  return Toast.fire({
-    text: message,
-    icon: "error",
-    timer: timer,
-  });
+  try {
+    return Toast.fire({
+      text: message,
+      icon: "error",
+      timer: timer,
+    });
+  } catch (error) {
+    // Fallback: return resolved promise to prevent breaking promise chains
+    return Promise.resolve();
+  }
 };
 
 /**
@@ -130,11 +140,16 @@ export const showError = (message, timer = 3000) => {
  * });
  */
 export const showWarning = (message, timer = 2500) => {
-  return Toast.fire({
-    text: message,
-    icon: "warning",
-    timer: timer,
-  });
+  try {
+    return Toast.fire({
+      text: message,
+      icon: "warning",
+      timer: timer,
+    });
+  } catch (error) {
+    // Fallback: return resolved promise to prevent breaking promise chains
+    return Promise.resolve();
+  }
 };
 
 /**
@@ -165,9 +180,14 @@ export const showWarning = (message, timer = 2500) => {
  * });
  */
 export const showInfo = (message, timer = 2000) => {
-  return Toast.fire({
-    text: message,
-    icon: "info",
-    timer: timer,
-  });
+  try {
+    return Toast.fire({
+      text: message,
+      icon: "info",
+      timer: timer,
+    });
+  } catch (error) {
+    // Fallback: return resolved promise to prevent breaking promise chains
+    return Promise.resolve();
+  }
 };

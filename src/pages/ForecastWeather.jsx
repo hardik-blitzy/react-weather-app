@@ -55,59 +55,96 @@ const ForecastWeather = () => {
 	 * Constructs URL based on available user location data (city name or coordinates).
 	 */
 	useEffect(() => {
-		jQuery(($) => {
-			$.noConflict();
-			const weatherUnit = db.get("WEATHER_UNIT") || "metric";
-			const userCity = db.get("USER_DEFAULT_LOCATION");
-			const userLatitude = db.get("USER_LATITUDE");
-			const userLongitude = db.get("USER_LONGITUDE");
-			
-			// Build forecast URL based on available location data
-			let forecastUrl;
-			if (userCity === null && userLatitude === null && userLongitude === null) {
-				// No location data available - display error toast
-				showError("No saved location found!");
-				return;
-			} else if (userCity === null && userLatitude !== null && userLongitude !== null) {
-				// Use coordinates when city name is not available
-				forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?lat=${userLatitude}&lon=${userLongitude}&appid=${API_KEY}&units=${weatherUnit}`;
-			} else {
-				// Prefer city name for location query
-				forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${userCity}&appid=${API_KEY}&units=${weatherUnit}`;
-			}
-
-			$.ajax({
-				url: forecastUrl,
-				success: (result, status, xhr) => {
-					if (result.cod === "200" || result.cod === 200) {
-						setForecastData(result);
+		try {
+			jQuery(($) => {
+				try {
+					$.noConflict();
+					
+					// Get location data with safe fallbacks
+					let weatherUnit, userCity, userLatitude, userLongitude;
+					try {
+						weatherUnit = db.get("WEATHER_UNIT") || "metric";
+						userCity = db.get("USER_DEFAULT_LOCATION");
+						userLatitude = db.get("USER_LATITUDE");
+						userLongitude = db.get("USER_LONGITUDE");
+					} catch (dbError) {
+						weatherUnit = "metric";
+						userCity = null;
+						userLatitude = null;
+						userLongitude = null;
 					}
-				},
-				error: (xhr, status, error) => {
-					// Handle network errors vs API errors differently
-					if (error === "") {
-						showInfo("Network Error!", 1000).then(() => {
-							currentWeather.scrollToElement("forecastPage");
-						});
+					
+					// Build forecast URL based on available location data
+					let forecastUrl;
+					if (userCity === null && userLatitude === null && userLongitude === null) {
+						// No location data available - display error toast
+						showError("No saved location found!");
+						return;
+					} else if (userCity === null && userLatitude !== null && userLongitude !== null) {
+						// Use coordinates when city name is not available
+						forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?lat=${userLatitude}&lon=${userLongitude}&appid=${API_KEY}&units=${weatherUnit}`;
 					} else {
-						showError(error, 1000).then(() => {
-							currentWeather.scrollToElement("forecastPage");
-						});
+						// Prefer city name for location query
+						forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${encodeURIComponent(userCity)}&appid=${API_KEY}&units=${weatherUnit}`;
 					}
-				},
+
+					$.ajax({
+						url: forecastUrl,
+						success: (result, status, xhr) => {
+							try {
+								if (result && (result.cod === "200" || result.cod === 200)) {
+									setForecastData(result);
+								} else {
+									showError(result?.message || "Failed to load forecast data.", 2000);
+								}
+							} catch (successError) {
+								showError("Failed to process forecast data.");
+							}
+						},
+						error: (xhr, status, error) => {
+							try {
+								// Handle network errors vs API errors differently
+								if (error === "") {
+									showInfo("Network Error!", 1000).then(() => {
+										currentWeather.scrollToElement("forecastPage");
+									});
+								} else {
+									const errorMessage = xhr.responseJSON?.message || error || "Request failed";
+									showError(errorMessage, 1000).then(() => {
+										currentWeather.scrollToElement("forecastPage");
+									});
+								}
+							} catch (errorHandlerError) {
+								showError("Failed to load forecast data.");
+							}
+						},
+					});
+				} catch (jqueryError) {
+					showError("Failed to initialize forecast page.");
+				}
 			});
-		});
+		} catch (error) {
+			showError("An unexpected error occurred loading forecasts.");
+		}
 	}, []);
 
 	/**
 	 * Toggles visibility of the utility component overlay
 	 */
 	const addUtilityComponentHeight = () => {
-		jQuery(($) => {
-			$.noConflict();
-			$(".cmp").removeClass("d-none");
-			$(".utility-component").toggleClass("add-utility-component-height");
-		});
+		try {
+			jQuery(($) => {
+				try {
+					$.noConflict();
+					$(".cmp").removeClass("d-none");
+					$(".utility-component").toggleClass("add-utility-component-height");
+				} catch (innerError) {
+					// Silently fail - UI toggle is non-critical
+				}
+			});
+		} catch (error) {
+			// Silently fail - UI toggle is non-critical
+		}
 	};
 
 	/**
@@ -121,48 +158,81 @@ const ForecastWeather = () => {
 	 * @returns {JSX.Element[]} Array of ForecastDailyWeatherComponent elements
 	 */
 	const mapDayData = (result, startIndex, endIndex, shouldCache = false) => {
-		const outputArray = [];
-
-		for (let i = startIndex; i < endIndex; i++) {
-			const forecastItem = result.list[i];
-			const time = utilis.convertTo12Hour(utilis.getTimeFromDateString(forecastItem.dt_txt));
-			const weatherCode = forecastItem.weather[0].id;
-			const temp = Math.ceil(forecastItem.main.temp);
-			const description = forecastItem.weather[0].description;
-
-			outputArray.push(
-				new WeatherTemplate(
-					i,
-					time,
-					currentWeather.checkWeatherCode(weatherCode),
-					temp,
-					description
-				)
-			);
-
-			// Cache first day values for home screen reference
-			if (shouldCache) {
-				const cacheIndex = i - startIndex;
-				db.create(`WEATHER_FORECAST_TIME_${cacheIndex}`, time);
-				db.create(`WEATHER_FORECAST_ICON_${cacheIndex}`, `${weatherCode}`);
-				db.create(`WEATHER_FORECAST_UNIT_${cacheIndex}`, `${temp}`);
-				db.create(`WEATHER_FORECAST_TITLE_${cacheIndex}`, description);
+		try {
+			// Validate result structure
+			if (!result || !result.list || !Array.isArray(result.list)) {
+				return [];
 			}
-		}
 
-		// Map weather data to UI components
-		return outputArray.map((data) => {
-			const giveMoreDetails = () => showInfo(data.title, 3000);
-			return (
-				<ForecastDailyWeatherComponent
-					key={data.id}
-					time={data.time}
-					icon={data.icon}
-					weatherUnit={data.unit}
-					onClick={giveMoreDetails}
-				/>
-			);
-		});
+			const outputArray = [];
+			// Ensure we don't go past the array bounds
+			const safeEndIndex = Math.min(endIndex, result.list.length);
+
+			for (let i = startIndex; i < safeEndIndex; i++) {
+				try {
+					const forecastItem = result.list[i];
+					
+					// Validate forecast item
+					if (!forecastItem || !forecastItem.weather || !forecastItem.main) {
+						continue;
+					}
+
+					const time = utilis.convertTo12Hour(utilis.getTimeFromDateString(forecastItem.dt_txt || ""));
+					const weatherCode = forecastItem.weather[0]?.id || 800;
+					const temp = forecastItem.main.temp != null ? Math.ceil(forecastItem.main.temp) : "--";
+					const description = forecastItem.weather[0]?.description || "No description";
+
+					outputArray.push(
+						new WeatherTemplate(
+							i,
+							time,
+							currentWeather.checkWeatherCode(weatherCode),
+							temp,
+							description
+						)
+					);
+
+					// Cache first day values for home screen reference
+					if (shouldCache) {
+						try {
+							const cacheIndex = i - startIndex;
+							db.create(`WEATHER_FORECAST_TIME_${cacheIndex}`, time);
+							db.create(`WEATHER_FORECAST_ICON_${cacheIndex}`, `${weatherCode}`);
+							db.create(`WEATHER_FORECAST_UNIT_${cacheIndex}`, `${temp}`);
+							db.create(`WEATHER_FORECAST_TITLE_${cacheIndex}`, description);
+						} catch (cacheError) {
+							// Non-critical - continue even if caching fails
+						}
+					}
+				} catch (itemError) {
+					// Skip this item and continue with next
+					continue;
+				}
+			}
+
+			// Map weather data to UI components
+			return outputArray.map((data) => {
+				const giveMoreDetails = () => {
+					try {
+						showInfo(data.title, 3000);
+					} catch (toastError) {
+						// Silently fail - toast is non-critical
+					}
+				};
+				return (
+					<ForecastDailyWeatherComponent
+						key={data.id}
+						time={data.time}
+						icon={data.icon}
+						weatherUnit={data.unit}
+						onClick={giveMoreDetails}
+					/>
+				);
+			});
+		} catch (error) {
+			// Return empty array on any error
+			return [];
+		}
 	};
 
 	/**

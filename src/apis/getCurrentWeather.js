@@ -36,11 +36,19 @@ import Haze from "./../assets/static/haze.svg";
  * @returns {void}
  */
 export const closeUtilityComponent = () => {
-	jQuery(($) => {
-		$.noConflict();
-		$(".cmp").addClass("d-none");
-		$(".utility-component").removeClass("add-utility-component-height");
-	});
+	try {
+		jQuery(($) => {
+			try {
+				$.noConflict();
+				$(".cmp").addClass("d-none");
+				$(".utility-component").removeClass("add-utility-component-height");
+			} catch (innerError) {
+				// Silently fail - UI component hide is non-critical
+			}
+		});
+	} catch (error) {
+		// Silently fail - UI component hide is non-critical
+	}
 };
 
 /**
@@ -64,9 +72,15 @@ export const WEATHER_UNIT = db.get("WEATHER_UNIT") || "metric";
  * @returns {void}
  */
 export const scrollToElement = (elementId) => {
-	document
-		.getElementById(`${elementId}`)
-		.scrollIntoView({ behaviour: "smooth" });
+	try {
+		const element = document.getElementById(`${elementId}`);
+		if (element) {
+			element.scrollIntoView({ behaviour: "smooth" });
+		}
+		// Silently fail if element not found - scroll is non-critical
+	} catch (error) {
+		// Silently fail - scroll is non-critical functionality
+	}
 };
 
 /**
@@ -81,31 +95,42 @@ export const scrollToElement = (elementId) => {
  * @returns {string} Single character unit abbreviation (c, f, or k)
  */
 export const checkWeatherUnitDeg = () => {
-	let result;
-	if (db.get("WEATHER_UNIT")) {
-		switch (db.get("WEATHER_UNIT")) {
-			case "celsius":
-				result = "c";
-				break;
+	try {
+		let result;
+		const weatherUnit = db.get("WEATHER_UNIT");
+		
+		if (weatherUnit) {
+			switch (weatherUnit) {
+				case "celsius":
+					result = "c";
+					break;
 
-			case "farenheit":
-				result = "f";
-				break;
+				case "farenheit":
+					result = "f";
+					break;
 
-			case "kelvin":
-				result = "k";
-				break;
+				case "kelvin":
+					result = "k";
+					break;
 
-			default:
-				result = "c";
+				default:
+					result = "c";
+			}
+		} else {
+			// Default to celsius if no unit preference is stored
+			try {
+				db.create("WEATHER_UNIT", "celsius");
+			} catch (dbError) {
+				// Silently fail on db create - use default anyway
+			}
+			result = "c";
 		}
-	} else {
-		// Default to celsius if no unit preference is stored
-		db.create("WEATHER_UNIT", "celsius");
-		result = "c";
-	}
 
-	return result;
+		return result;
+	} catch (error) {
+		// Fallback: return default unit 'c' if any error occurs
+		return "c";
+	}
 };
 
 /**
@@ -117,23 +142,42 @@ export const checkWeatherUnitDeg = () => {
  * @returns {void}
  */
 export const handleWeatherForm = (e, search) => {
-	e.preventDefault();
+	try {
+		e.preventDefault();
 
-	// Notify user if location tracking is disabled
-	if (db.get("TRACK_SAVED_LOCATION_WEATHER") === "false") {
-		showInfo("Changes settings to track default location", 1500).then((willProceed) => {
-			scrollToElement("weatherContainer");
-		});
+		// Notify user if location tracking is disabled
+		try {
+			if (db.get("TRACK_SAVED_LOCATION_WEATHER") === "false") {
+				showInfo("Changes settings to track default location", 1500).then((willProceed) => {
+					scrollToElement("weatherContainer");
+				});
+			}
+		} catch (dbError) {
+			// Continue with form submission even if db check fails
+		}
+
+		const searchInput = jQuery("#searchWeather").val();
+		const userSearch = searchInput || search || "";
+		
+		if (!userSearch.trim()) {
+			showWarning("Please enter a location to search", 2000);
+			return;
+		}
+
+		getCurrentWeather(userSearch.trim());
+		scrollToElement("weatherContainer");
+		
+		// Clear search input after submission
+		try {
+			jQuery(($) => {
+				$("#searchWeather").val("");
+			});
+		} catch (clearError) {
+			// Non-critical - continue even if clearing fails
+		}
+	} catch (error) {
+		showError("Failed to search for weather. Please try again.");
 	}
-
-	const userSearch = jQuery("#searchWeather").val() || search;
-	getCurrentWeather(userSearch.trim());
-	scrollToElement("weatherContainer");
-	
-	// Clear search input after submission
-	jQuery(($) => {
-		$("#searchWeather").val("");
-	});
 };
 
 /**
@@ -152,45 +196,73 @@ const CITY_API_KEY = "lNhOELJHDMrwCwm40hFvwA==teZv2EboEGJfonOC";
  * @returns {void}
  */
 export const findCity = (searchTerm, updateDataArray) => {
-	// Notify user if location tracking is disabled
-	if (db.get("TRACK_SAVED_LOCATION_WEATHER") === "false") {
-		showInfo("Changes settings to track default location", 1500).then((willProceed) => {
-			scrollToElement("weatherContainer");
+	try {
+		// Validate inputs
+		if (!searchTerm || typeof searchTerm !== 'string') {
+			showWarning("Please enter a valid search term", 1500);
+			return;
+		}
+
+		// Notify user if location tracking is disabled
+		try {
+			if (db.get("TRACK_SAVED_LOCATION_WEATHER") === "false") {
+				showInfo("Changes settings to track default location", 1500).then((willProceed) => {
+					scrollToElement("weatherContainer");
+				});
+			}
+		} catch (dbError) {
+			// Continue even if db check fails
+		}
+
+		jQuery(($) => {
+			try {
+				$.ajax({
+					url: `https://api.api-ninjas.com/v1/city?name=${encodeURIComponent(searchTerm)}&limit=4`,
+					processData: false,
+					headers: {
+						'X-Api-Key': CITY_API_KEY
+					},
+					success: (result, status, xhr) => {
+						try {
+							if (xhr.status !== 200) {
+								showError("Something went wrong!", 1000);
+							} else {
+								// Pass successful results to callback
+								if (typeof updateDataArray === 'function') {
+									updateDataArray(result || []);
+								}
+							}
+						} catch (successError) {
+							showError("Failed to process city results.");
+						}
+					},
+					error: (xhr, status, error) => {
+						try {
+							$("#searchWeather").val(" ");
+							closeUtilityComponent();
+
+							// Display appropriate error toast based on error type
+							if (error === "") {
+								showError("Network Error!", 1000).then((willProceed) => {
+									scrollToElement("weatherContainer");
+								});
+							} else {
+								showWarning(error || "Request failed", 1000).then((willProceed) => {
+									scrollToElement("weatherContainer");
+								});
+							}
+						} catch (errorHandlingError) {
+							showError("An error occurred while searching.");
+						}
+					},
+				});
+			} catch (ajaxError) {
+				showError("Failed to search for cities. Please try again.");
+			}
 		});
+	} catch (error) {
+		showError("An unexpected error occurred. Please try again.");
 	}
-
-	jQuery(($) => {
-		$.ajax({
-			url: `https://api.api-ninjas.com/v1/city?name=${searchTerm}&limit=4`,
-			processData: false,
-			headers: {
-				'X-Api-Key': CITY_API_KEY
-			},
-			success: (result, status, xhr) => {
-				if (xhr.status !== 200) {
-					showError("Something went wrong!", 1000);
-				} else {
-					// Pass successful results to callback
-					updateDataArray(result);
-				}
-			},
-			error: (xhr, status, error) => {
-				$("#searchWeather").val(" ");
-				closeUtilityComponent();
-
-				// Display appropriate error toast based on error type
-				if (error === "") {
-					showError("Network Error!", 1000).then((willProceed) => {
-						scrollToElement("weatherContainer");
-					});
-				} else {
-					showWarning(error, 1000).then((willProceed) => {
-						scrollToElement("weatherContainer");
-					});
-				}
-			},
-		});
-	});
 };
 
 /**
@@ -284,40 +356,70 @@ export const checkWeatherCode = (code) => {
  * @returns {void}
  */
 export const updateReactDom = (result) => {
-	jQuery(($) => {
-		$.noConflict();
-		
-		// Clear search and close utility overlay
-		$("#searchWeather").val(" ");
-		closeUtilityComponent();
-		scrollToElement("weatherContainer");
-		
-		// Update main weather display
-		$("#weatherLocation").html(`${result.name} ${result.sys.country}`);
-		$("#currentDeg").html(Math.ceil(result.main.temp));
-		$("#weatherDes").html(result.weather[0].description);
-		$("#currentDate").html(getCurrentDate());
-		
-		// Set weather icon based on condition code
-		checkWeatherCode(result.weather[0].id);
-		$("#main-weather-icon-container").html(
-			`<img src=${weatherSvg} alt="main-weather-icon" width="64" height="64"/>`
-		);
-		
-		// Update sub-weather detail components
-		$("#wind-value").html(`${result.wind.speed} m/s`);
-		$("#humidity-value").html(`${result.main.humidity} %`);
-		$("#pressure-value").html(`${result.main.pressure} hPa`);
-		
-		// Cache weather data to localStorage for offline support
-		db.create("WEATHER_LOCATION", `${result.name} ${result.sys.country}`);
-		db.create("WEATHER_DEG", result.main.temp);
-		db.create("WEATHER_DESCRIPTION", result.weather[0].description);
-		db.create("WEATHER_CODE", result.weather[0].id);
-		db.create("SUB_WEATHER_WIND_VALUE", `${result.wind.speed} m/s`);
-		db.create("SUB_WEATHER_HUMIDITY_VALUE", `${result.main.humidity} %`);
-		db.create("SUB_WEATHER_PRESSURE_VALUE", `${result.main.pressure} hPa`);
-	});
+	try {
+		// Validate result object has required properties
+		if (!result || !result.name || !result.sys || !result.main || !result.weather) {
+			showError("Invalid weather data received.");
+			return;
+		}
+
+		jQuery(($) => {
+			try {
+				$.noConflict();
+				
+				// Clear search and close utility overlay
+				$("#searchWeather").val(" ");
+				closeUtilityComponent();
+				scrollToElement("weatherContainer");
+				
+				// Update main weather display with safe fallbacks
+				const locationName = result.name || "Unknown";
+				const countryCode = result.sys.country || "";
+				const temperature = result.main.temp != null ? Math.ceil(result.main.temp) : "--";
+				const description = result.weather[0]?.description || "No description";
+				
+				$("#weatherLocation").html(`${locationName} ${countryCode}`);
+				$("#currentDeg").html(temperature);
+				$("#weatherDes").html(description);
+				$("#currentDate").html(getCurrentDate());
+				
+				// Set weather icon based on condition code
+				const weatherCode = result.weather[0]?.id;
+				if (weatherCode) {
+					checkWeatherCode(weatherCode);
+					$("#main-weather-icon-container").html(
+						`<img src=${weatherSvg} alt="main-weather-icon" width="64" height="64"/>`
+					);
+				}
+				
+				// Update sub-weather detail components with safe fallbacks
+				const windSpeed = result.wind?.speed != null ? result.wind.speed : "--";
+				const humidity = result.main?.humidity != null ? result.main.humidity : "--";
+				const pressure = result.main?.pressure != null ? result.main.pressure : "--";
+				
+				$("#wind-value").html(`${windSpeed} m/s`);
+				$("#humidity-value").html(`${humidity} %`);
+				$("#pressure-value").html(`${pressure} hPa`);
+				
+				// Cache weather data to localStorage for offline support
+				try {
+					db.create("WEATHER_LOCATION", `${locationName} ${countryCode}`);
+					db.create("WEATHER_DEG", result.main.temp);
+					db.create("WEATHER_DESCRIPTION", description);
+					db.create("WEATHER_CODE", weatherCode);
+					db.create("SUB_WEATHER_WIND_VALUE", `${windSpeed} m/s`);
+					db.create("SUB_WEATHER_HUMIDITY_VALUE", `${humidity} %`);
+					db.create("SUB_WEATHER_PRESSURE_VALUE", `${pressure} hPa`);
+				} catch (cacheError) {
+					// Non-critical - continue even if caching fails
+				}
+			} catch (domError) {
+				showError("Failed to display weather data.");
+			}
+		});
+	} catch (error) {
+		showError("An unexpected error occurred while updating weather.");
+	}
 };
 
 /**
@@ -329,38 +431,64 @@ export const updateReactDom = (result) => {
  * @returns {void}
  */
 export const getCurrentWeather = (location) => {
-	jQuery(($) => {
-		const searchUrl = `https://api.openweathermap.org/data/2.5/weather?q=${location}&appid=${API_KEY}&units=${WEATHER_UNIT}`;
+	try {
+		// Validate location input
+		if (!location || typeof location !== 'string' || !location.trim()) {
+			showWarning("Please enter a valid location", 2000);
+			return;
+		}
 
-		$.ajax({
-			url: searchUrl,
-			processData: false,
-			success: (result, status, xhr) => {
-				if (xhr.status !== 200) {
-					showError("Something went wrong!", 1000);
-				} else {
-					// Verify API returned successful response code
-					if (result.cod === 200) {
-						updateReactDom(result);
-					}
-				}
-			},
-			error: (xhr, status, error) => {
-				// Clear search field and close overlay on error
-				$("#searchWeather").val(" ");
-				closeUtilityComponent();
+		jQuery(($) => {
+			try {
+				const searchUrl = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(location)}&appid=${API_KEY}&units=${WEATHER_UNIT}`;
 
-				// Display appropriate error toast based on error type
-				if (error === "") {
-					showError("Network Error!", 1000).then((willProceed) => {
-						scrollToElement("weatherContainer");
-					});
-				} else {
-					showWarning(error, 1000).then((willProceed) => {
-						scrollToElement("weatherContainer");
-					});
-				}
-			},
+				$.ajax({
+					url: searchUrl,
+					processData: false,
+					success: (result, status, xhr) => {
+						try {
+							if (xhr.status !== 200) {
+								showError("Something went wrong!", 1000);
+							} else {
+								// Verify API returned successful response code
+								if (result && result.cod === 200) {
+									updateReactDom(result);
+								} else {
+									showError(result?.message || "Failed to get weather data", 2000);
+								}
+							}
+						} catch (successError) {
+							showError("Failed to process weather data.");
+						}
+					},
+					error: (xhr, status, error) => {
+						try {
+							// Clear search field and close overlay on error
+							$("#searchWeather").val(" ");
+							closeUtilityComponent();
+
+							// Display appropriate error toast based on error type
+							if (error === "") {
+								showError("Network Error!", 1000).then((willProceed) => {
+									scrollToElement("weatherContainer");
+								});
+							} else {
+								// Handle specific API errors
+								const errorMessage = xhr.responseJSON?.message || error || "Request failed";
+								showWarning(errorMessage, 1000).then((willProceed) => {
+									scrollToElement("weatherContainer");
+								});
+							}
+						} catch (errorHandlingError) {
+							showError("An error occurred while fetching weather.");
+						}
+					},
+				});
+			} catch (ajaxError) {
+				showError("Failed to fetch weather data. Please try again.");
+			}
 		});
-	});
+	} catch (error) {
+		showError("An unexpected error occurred. Please try again.");
+	}
 };

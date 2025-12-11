@@ -34,21 +34,30 @@ import navigate from "../inc/scripts/utilities";
  * </form>
  */
 export const saveLocation = (e) => {
-	e.preventDefault();
+	try {
+		e.preventDefault();
 
-	jQuery(($) => {
-		$.noConflict();
+		jQuery(($) => {
+			try {
+				$.noConflict();
 
-		const $defaultLocation = $("#defaultLocation").val().trim();
+				const $defaultLocation = $("#defaultLocation").val();
+				const trimmedLocation = $defaultLocation ? $defaultLocation.trim() : "";
 
-		// Check if the location is empty
-		if ($defaultLocation === undefined || $defaultLocation === "") {
-			showError("Please enter a valid location", 4000);
-		} else {
-			db.update("USER_DEFAULT_LOCATION", $defaultLocation);
-			showSuccess("Location updated successfully!", 3000);
-		}
-	});
+				// Check if the location is empty
+				if (trimmedLocation === undefined || trimmedLocation === "") {
+					showError("Please enter a valid location", 4000);
+				} else {
+					db.update("USER_DEFAULT_LOCATION", trimmedLocation);
+					showSuccess("Location updated successfully!", 3000);
+				}
+			} catch (innerError) {
+				showError("Failed to save location. Please try again.");
+			}
+		});
+	} catch (error) {
+		showError("An unexpected error occurred. Please try again.");
+	}
 };
 
 /**
@@ -63,7 +72,12 @@ export const saveLocation = (e) => {
  * }
  */
 export const getDefaultLocation = () => {
-	return db.get("USER_DEFAULT_LOCATION");
+	try {
+		return db.get("USER_DEFAULT_LOCATION");
+	} catch (error) {
+		// Fallback: return null if database access fails
+		return null;
+	}
 };
 
 /**
@@ -79,8 +93,18 @@ export const getDefaultLocation = () => {
  * <button onClick={restoreFactorySettings}>Reset All Settings</button>
  */
 export const restoreFactorySettings = () => {
-	db.destroy();
-	navigate("/");
+	try {
+		db.destroy();
+		navigate("/");
+	} catch (error) {
+		// Fallback: attempt navigation even if destroy fails
+		try {
+			navigate("/");
+		} catch (navError) {
+			// If navigation also fails, reload the page as last resort
+			window.location.href = "/";
+		}
+	}
 };
 
 /**
@@ -101,26 +125,40 @@ export const restoreFactorySettings = () => {
  * />
  */
 export const trackSavedLocationWeather = () => {
-	jQuery(($) => {
-		$.noConflict();
-		const $toggleBtn = document.getElementById("flexSwitchCheckDefault");
+	try {
+		jQuery(($) => {
+			try {
+				$.noConflict();
+				const $toggleBtn = document.getElementById("flexSwitchCheckDefault");
 
-		if ($toggleBtn.checked) {
-			// Check if the value is in the database, then update it
-			if (db.get("TRACK_SAVED_LOCATION_WEATHER")) {
-				db.update("TRACK_SAVED_LOCATION_WEATHER", true);
-				showSuccess("Saved location would be tracked!", 3000);
-			} else {
-				db.create("TRACK_SAVED_LOCATION_WEATHER", true);
-				showInfo("Saved location would be tracked by default!", 3000);
+				// Fallback if toggle button not found
+				if (!$toggleBtn) {
+					showError("Settings control not found. Please refresh the page.");
+					return;
+				}
+
+				if ($toggleBtn.checked) {
+					// Check if the value is in the database, then update it
+					if (db.get("TRACK_SAVED_LOCATION_WEATHER")) {
+						db.update("TRACK_SAVED_LOCATION_WEATHER", true);
+						showSuccess("Saved location would be tracked!", 3000);
+					} else {
+						db.create("TRACK_SAVED_LOCATION_WEATHER", true);
+						showInfo("Saved location would be tracked by default!", 3000);
+					}
+				} else {
+					if (db.get("TRACK_SAVED_LOCATION_WEATHER")) {
+						db.update("TRACK_SAVED_LOCATION_WEATHER", false);
+						showWarning("Saved location would not be tracked!", 3000);
+					}
+				}
+			} catch (innerError) {
+				showError("Failed to update tracking settings.");
 			}
-		} else {
-			if (db.get("TRACK_SAVED_LOCATION_WEATHER")) {
-				db.update("TRACK_SAVED_LOCATION_WEATHER", false);
-				showWarning("Saved location would not be tracked!", 3000);
-			}
-		}
-	});
+		});
+	} catch (error) {
+		showError("An unexpected error occurred. Please try again.");
+	}
 };
 
 /**
@@ -134,8 +172,13 @@ export const trackSavedLocationWeather = () => {
  * }
  */
 export const checkTrackedLocation = () => {
-	// Returns true only if tracking is explicitly enabled
-	return db.get("TRACK_SAVED_LOCATION_WEATHER") === true;
+	try {
+		// Returns true only if tracking is explicitly enabled
+		return db.get("TRACK_SAVED_LOCATION_WEATHER") === true;
+	} catch (error) {
+		// Fallback: return false if database access fails
+		return false;
+	}
 };
 
 /**
@@ -162,32 +205,47 @@ export const checkTrackedLocation = () => {
  * </select>
  */
 export const changeWeatherUnit = (e) => {
-	jQuery(($) => {
-		e.preventDefault();
-		const weatherUnit = $("#weatherUnitContainer").val();
-		let unitToStore;
-		switch (weatherUnit) {
-			case "0":
-				unitToStore = "metric";
-				break;
-			case "1":
-				unitToStore = "default";
-				break;
-			case "2":
-				unitToStore = "imperial";
-				break;
-			
-			default:
-				showWarning("Select a valid unit", 1000);
-				break;
-		}
-		// Check if value exists in the DB
-		if(db.get("WEATHER_UNIT")){
-			db.update("WEATHER_UNIT",unitToStore);
-			showSuccess("Weather unit updated successfully", 1500);
-		}else{
-			db.create("WEATHER_UNIT",unitToStore);
-			showInfo("Weather unit stored successfully", 1500);
-		}
-	});
+	try {
+		jQuery(($) => {
+			try {
+				e.preventDefault();
+				const weatherUnit = $("#weatherUnitContainer").val();
+				let unitToStore;
+				switch (weatherUnit) {
+					case "0":
+						unitToStore = "metric";
+						break;
+					case "1":
+						unitToStore = "default";
+						break;
+					case "2":
+						unitToStore = "imperial";
+						break;
+					
+					default:
+						showWarning("Select a valid unit", 1000);
+						return;
+				}
+
+				// Validate unit was set before saving
+				if (!unitToStore) {
+					showWarning("Please select a valid weather unit", 1500);
+					return;
+				}
+
+				// Check if value exists in the DB
+				if(db.get("WEATHER_UNIT")){
+					db.update("WEATHER_UNIT",unitToStore);
+					showSuccess("Weather unit updated successfully", 1500);
+				}else{
+					db.create("WEATHER_UNIT",unitToStore);
+					showInfo("Weather unit stored successfully", 1500);
+				}
+			} catch (innerError) {
+				showError("Failed to update weather unit.");
+			}
+		});
+	} catch (error) {
+		showError("An unexpected error occurred. Please try again.");
+	}
 };
