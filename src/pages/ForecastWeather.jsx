@@ -37,7 +37,8 @@ const ForecastWeather = () => {
 	useEffect(() => {
 		jQuery(($) => {
 			$.noConflict();
-			const $API_KEY = "cd34f692e856e493bd936095b256b337";
+			// Security: API key imported from centralized module (CWE-798 remediation)
+			const $API_KEY = currentWeather.API_KEY;
 			const $WEATHER_UNIT = db.get("WEATHER_UNIT") || "metric";
 			const $user_city = db.get("USER_DEFAULT_LOCATION");
 			const $user_latitude = db.get("USER_LATITUDE");

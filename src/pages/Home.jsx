@@ -5,7 +5,6 @@ import Spinner from "./../components/spinner";
 import navigate from "./../inc/scripts/utilities";
 import { db } from "./../backend/app_backend";
 import Swal from "sweetalert2";
-conflicts creation manual
 import jQuery from "jquery";
 const Home = () => {
   const customBtnStyle = {
