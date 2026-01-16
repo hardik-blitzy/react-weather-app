@@ -5,7 +5,6 @@ import Spinner from "./../components/spinner";
 import navigate from "./../inc/scripts/utilities";
 import { db } from "./../backend/app_backend";
 import Swal from "sweetalert2";
-conflicts creation manual
 import jQuery from "jquery";
 const Home = () => {
   const customBtnStyle = {
@@ -33,7 +32,7 @@ const Home = () => {
           $.noConflict();
           const $defaultLocation = $("#defaultLocation").val().trim();
 
-          if ($defaultLocation === undefined || $defaultLocation == "") {
+          if ($defaultLocation === undefined || $defaultLocation === "") {
             Swal.fire({
               title: "Invalid Location!",
               html: "<p class=' text-center text-danger'>Please enter a valid location</p>",

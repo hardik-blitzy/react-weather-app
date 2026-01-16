@@ -3,6 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@popperjs/core": "^2.11.8",
+    "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.0.0",
@@ -21,6 +23,9 @@
     "react-swipeable": "^7.0.2",
     "sweetalert2": "^11.12.1",
     "web-vitals": "^2.1.4"
+  },
+  "devDependencies": {
+    "ajv": "^8.17.1"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -45,5 +50,12 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "overrides": {
+    "form-data": "^4.0.4",
+    "braces": "^3.0.3",
+    "postcss": "^8.4.47",
+    "nth-check": "^2.1.1",
+    "semver": "^7.6.3"
   }
 }

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import Footer from "../components/footer";
 import navigate from "../inc/scripts/utilities";
 import Button from "../components/button";
@@ -16,7 +16,6 @@ const Settings = () => {
     navigate("https://github.com/Adedoyin-Emmanuel");
   }
 
-  const [defaultLocation, setDefaultLocation] = useState("");
   return (
     <React.Fragment>
       <Spinner />

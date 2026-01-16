@@ -1,29 +1,12 @@
 import React, { useState, useEffect } from "react";
 import Footer from "../components/footer";
 import navigate from "../inc/scripts/utilities";
-import Spinner from "../components/spinner";
 import Button from "./../components/button";
 import jQuery from "jquery";
 import { db } from "../backend/app_backend";
-import { getCurrentDate } from "../inc/scripts/utilities";
 import * as currentWeather from "./../apis/getCurrentWeather";
-import HumidityIcon from "./../assets/humidity-icon.svg";
-import WindIcon from "./../assets/wind-icon.svg";
-import PressureIcon from "./../assets/pressure-icon.svg";
 import ForecastDailyWeatherComponent from "./../components/forecastWeatherComponent";
 import Swal from "sweetalert2";
-import Thunder from "./../assets/static/thunder.svg";
-import Day from "./../assets/static/day.svg";
-import Drizzle from "./../assets/static/rainy-5.svg";
-import Rainy from "./../assets/static/rainy-7.svg";
-import Snowy from "./../assets/static/snowy-6.svg";
-import FreezingRain from "./../assets/static/freezing-rain.svg";
-import Misty from "./../assets/static/mist.svg";
-import BrokenClouds from "./../assets/static/broken-clouds.svg";
-import OvercastClouds from "./../assets/static/overcast-clouds.svg";
-import ScatteredClouds from "./../assets/static/scattered-clouds.svg";
-import FewClouds from "./../assets/static/few-clouds.svg";
-import Haze from "./../assets/static/haze.svg";
 import * as utilis from "./../inc/scripts/utilities";
 const ForecastWeather = () => {
 	//check if the user navigated from the home page
@@ -37,15 +20,16 @@ const ForecastWeather = () => {
 	useEffect(() => {
 		jQuery(($) => {
 			$.noConflict();
-			const $API_KEY = "cd34f692e856e493bd936095b256b337";
+			// Security: API key imported from centralized module (CWE-798 remediation)
+			const $API_KEY = currentWeather.API_KEY;
 			const $WEATHER_UNIT = db.get("WEATHER_UNIT") || "metric";
 			const $user_city = db.get("USER_DEFAULT_LOCATION");
 			const $user_latitude = db.get("USER_LATITUDE");
 			const $user_longitude = db.get("USER_LONGITUDE");
 			let FORECAST_URL;
 			if (
-				$user_city == null && $user_latitude == null &&
-				$user_longitude == null
+				$user_city === null && $user_latitude === null &&
+				$user_longitude === null
 			) {
 				console.log(typeof $user_city);
 				Swal.fire({
@@ -59,9 +43,9 @@ const ForecastWeather = () => {
 					return;
 				});
 			} else if (
-				$user_city == null &&
-				$user_latitude != null &&
-				$user_longitude != null
+				$user_city === null &&
+				$user_latitude !== null &&
+				$user_longitude !== null
 			) {
 				FORECAST_URL = `https://api.openweathermap.org/data/2.5/forecast?lat=${$user_latitude}&lon=${$user_longitude}&appid=${$API_KEY}&units=${$WEATHER_UNIT}`;
 			} else {
@@ -70,14 +54,14 @@ const ForecastWeather = () => {
 			$.ajax({
 				url: FORECAST_URL,
 				success: (result, status, xhr) => {
-					if (result.cod == 200) {
+					if (result.cod === 200) {
 						setForecastData(result);
 					}
 				},
 
 				error: (xhr, status, error) => {
 					//check if the error is empty
-					if (error == "") {
+					if (error === "") {
 						Swal.fire({
 							toast: true,
 							text: "Network Error!",
@@ -462,7 +446,7 @@ const ForecastWeather = () => {
 					<section
 						className="day-1-weather future-weather-forecast my-4 d-flex align-items-center justify-content-between "
 						style={{ overflowX: "scroll" }}>
-						{!(forecastData == null) ? (
+						{forecastData !== null ? (
 							mapFirstDayData(forecastData)
 						) : (
 							"loading.."
@@ -479,7 +463,7 @@ const ForecastWeather = () => {
 					<section
 						className="day-2-weather future-weather-forecast my-4 d-flex align-items-center justify-content-between "
 						style={{ overflowX: "scroll" }}>
-						{!(forecastData == null) ? (
+						{forecastData !== null ? (
 							mapSecondDayData(forecastData)
 						) : (
 							"loading.."
@@ -496,7 +480,7 @@ const ForecastWeather = () => {
 					<section
 						className="day-3-weather future-weather-forecast my-4 d-flex align-items-center justify-content-between "
 						style={{ overflowX: "scroll" }}>
-						{!(forecastData == null) ? (
+						{forecastData !== null ? (
 							mapThirdDayData(forecastData)
 						) : (
 							"loading.."
@@ -513,7 +497,7 @@ const ForecastWeather = () => {
 					<section
 						className="day-4-weather future-weather-forecast my-4 d-flex align-items-center justify-content-between "
 						style={{ overflowX: "scroll" }}>
-						{!(forecastData == null) ? (
+						{forecastData !== null ? (
 							mapFourthDayData(forecastData)
 						) : (
 							"loading.."
@@ -530,7 +514,7 @@ const ForecastWeather = () => {
 					<section
 						className="day-5-weather future-weather-forecast my-4 d-flex align-items-center justify-content-between "
 						style={{ overflowX: "scroll" }}>
-						{!(forecastData == null) ? (
+						{forecastData !== null ? (
 							mapFifthDayData(forecastData)
 						) : (
 							"loading.."
