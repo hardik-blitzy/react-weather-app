@@ -6,7 +6,6 @@ pipeline {
             agent {
                 docker {
                     image 'node:lts-alpine'
-                    args '-u root:root'
                 }
             }
             steps{
@@ -14,11 +13,23 @@ pipeline {
                 sh './scripts/test.sh'
             }
         }
+        stage("Security Scan"){
+            agent {
+                docker {
+                    image 'node:lts-alpine'
+                }
+            }
+            steps{
+                sh "chmod +x -R ${env.WORKSPACE}"
+                sh "npm install --legacy-peer-deps"
+                // Run npm audit and fail the build if high-severity vulnerabilities are found
+                sh "npm audit --audit-level=high"
+            }
+        }
         stage("Build"){
             agent {
                 docker {
                     image 'node:lts-alpine'
-                    args '-u root:root'
                 }
             }
             steps{
@@ -33,9 +44,10 @@ pipeline {
                 branch "development"
             }
             steps{
-                sh 'sudo rm -rf /var/www/jenkins-weather-app'
-                sh "sudo cp -r ${env.WORKSPACE}/build /var/www/jenkins-weather-app"
-                sh "sudo ls /var/www/jenkins-weather-app"
+                // Removed sudo - proper permissions should be configured on the Jenkins agent
+                sh 'rm -rf /var/www/jenkins-weather-app'
+                sh "cp -r ${env.WORKSPACE}/build /var/www/jenkins-weather-app"
+                sh "ls /var/www/jenkins-weather-app"
                 // sh './scripts/kill.sh'
             }
         }
