@@ -22,7 +22,13 @@ export const closeUtilityComponent = () => {
 		$(".utility-component").removeClass("add-utility-component-height");
 	});
 };
-export const API_KEY = "cd34f692e856e493bd936095b256b337";
+// Security: API key loaded from environment variable (CWE-798 remediation)
+export const API_KEY = process.env.REACT_APP_OPENWEATHERMAP_API_KEY;
+
+// Warn if OpenWeatherMap API key is not configured
+if (!API_KEY) {
+	console.warn('Warning: REACT_APP_OPENWEATHERMAP_API_KEY environment variable is not set. Weather API calls will fail.');
+}
 
 export const WEATHER_UNIT = db.get("WEATHER_UNIT") || "metric";
 
@@ -99,7 +105,13 @@ export const findCity = (searchTerm,updateDataArray)=> {
 			scrollToElement("weatherContainer");
 		});
 	}
-	const XAPIKEY = "lNhOELJHDMrwCwm40hFvwA==teZv2EboEGJfonOC";
+	// Security: API key loaded from environment variable (CWE-798 remediation)
+	const XAPIKEY = process.env.REACT_APP_API_NINJAS_KEY;
+	
+	// Warn if API Ninjas key is not configured
+	if (!XAPIKEY) {
+		console.warn('Warning: REACT_APP_API_NINJAS_KEY environment variable is not set. City search will fail.');
+	}
 	jQuery(($)=>{
 		console.log("Ajax sent")
 		$.ajax({
