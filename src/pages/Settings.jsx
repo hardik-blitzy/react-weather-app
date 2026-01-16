@@ -16,7 +16,7 @@ const Settings = () => {
 	const [weatherUnit, setWeatherUnit] = useState();
 	//database returns a string
 	let trackedLocation = db.get("TRACK_SAVED_LOCATION_WEATHER");
-	let trackedLocationLegit = trackedLocation == "true" ? true : false;
+	let trackedLocationLegit = trackedLocation === "true" ? true : false;
 
 	return (
 		<React.Fragment>
