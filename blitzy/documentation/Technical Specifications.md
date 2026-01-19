@@ -129,6 +129,7 @@ Vulnerability affects **15+ files** across **8+ directories** with the following
 ```bash
 grep -r "cd34f692e856e493bd936095b256b337" src/
 # Found in: src/apis/getCurrentWeather.js, src/apis/getWeatherForecast.js, src/pages/ForecastWeather.jsx
+
 ```
 
 | File Path | Vulnerability Type | Lines Affected |
@@ -558,9 +559,11 @@ This configuration ensures all transitive dependencies are resolved to patched v
 
 ```bash
 # Dependency vulnerability scan
+
 npm audit --audit-level=high
 
 #### Expected result: 0 vulnerabilities
+
 #### or "found 0 vulnerabilities"
 ```
 
@@ -569,22 +572,28 @@ npm audit --audit-level=high
 1. **API Key Removal Verification:**
 ```bash
 # Search for hardcoded API key pattern
+
 grep -r "cd34f692e856e493bd936095b256b337" src/
 # Expected: No results
 
 #### Search for API key pattern in built files
+
 grep -r "cd34f692e856e493bd936095b256b337" build/
 #### Expected: No results
+
 ```
 
 2. **Environment Variable Verification:**
 ```bash
 # Create .env with test values
+
 echo "REACT_APP_OPENWEATHERMAP_API_KEY=test_key" > .env
 
 #### Start development server and verify API calls
+
 npm start
 #### Verify network requests use test_key
+
 ```
 
 3. **CSP Verification:**
@@ -596,13 +605,16 @@ npm start
 4. **Docker Security Verification:**
 ```bash
 # Build container
+
 docker build -t weather-app .
 
 #### Verify non-root user
+
 docker run weather-app whoami
 #### Expected: node (not root)
 
 #### Run security scan
+
 docker scan weather-app
 ```
 
@@ -642,6 +654,7 @@ docker scan weather-app
 
 ```bash
 # Full security verification sequence
+
 npm audit                           # Check vulnerabilities
 npm run build                       # Verify build succeeds
 npm test                           # Verify tests pass
@@ -765,18 +778,23 @@ Files and patterns NOT in scope are excluded because:
 
 ```bash
 # Dependency vulnerability scan
+
 npm audit --audit-level=high
 
 #### Security test execution
+
 npm test -- --watchAll=false
 
 #### Full test suite validation
+
 CI=true npm test
 
 #### Build verification
+
 npm run build
 
 #### Source code secret scan
+
 grep -rn "cd34f692e856e493bd936095b256b337\|lNhOELJHDMrwCwm40hFvwA" src/
 ```
 
