@@ -10,6 +10,7 @@
     "aos": "^2.3.4",
     "bootstrap": "^5.3.6",
     "bootstrap5": "^1.1.9",
+    "express": "^4.21.2",
     "framer-motion": "^8.5.5",
     "grunt": "^1.6.1",
     "jquery": "^3.7.1",
@@ -26,7 +27,8 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "serve": "node server.js"
   },
   "eslintConfig": {
     "extends": [
