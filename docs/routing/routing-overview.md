@@ -33,8 +33,6 @@ The full table of routes lives in [§3 below](#3-the-route-table).
 
 The React mount path is straightforward: `src/index.js` renders `<App />` inside `<React.StrictMode>`, and `App.js` mounts `<BrowserRouter>` containing the `<Routes>` block. There is no provider tree between `<App />` and `<BrowserRouter>` — the router context is the outermost wrapper around all rendered pages. See [§2](#2-the-browserrouter-mount-point) for the full mount chain.
 
-> For the historical (system-level) view of the routing surface, see [Technical Specifications §7.6.1](../../blitzy/documentation/Technical%20Specifications.md). The present document is intended as the contributor-facing routing reference; the existing technical specification is referenced for context and **not duplicated** here.
-
 ---
 
 ## 2. The BrowserRouter Mount Point
@@ -86,7 +84,6 @@ The `<BrowserRouter>` JSX tree is reproduced verbatim below from `src/App.js:19-
       </Routes>
     </BrowserRouter>
   );
-}
 ```
 
 Annotations:
@@ -159,7 +156,7 @@ The table below maps each import to its routing role:
 
 ### 4.1 Note on the Naming Quirk for `Support`
 
-> **Note:** The file `src/pages/Support.jsx` default-exports a function component whose **internal variable name is `Settings`** (line 6: `const Settings = () => { ... }`; line 108: `export default Settings;`). Despite the misleading internal name, this default export is imported into `src/App.js:2` as `Support` (since default imports may be aliased to any name at the import site) and is mounted at `/support`. Routing works correctly because it relies on the import name in the consumer file (`App.js`), not the export's internal variable name in the source file (`Support.jsx`). This is a code smell that should not be "fixed" without auditing every downstream artifact (documentation, comments, error messages); for additional context see Technical Specifications §7.6.7 in [`blitzy/documentation/Technical Specifications.md`](../../blitzy/documentation/Technical%20Specifications.md).
+> **Note:** The file `src/pages/Support.jsx` default-exports a function component whose **internal variable name is `Settings`** (line 6: `const Settings = () => { ... }`; line 108: `export default Settings;`). Despite the misleading internal name, this default export is imported into `src/App.js:2` as `Support` (since default imports may be aliased to any name at the import site) and is mounted at `/support`. Routing works correctly because it relies on the import name in the consumer file (`App.js`), not the export's internal variable name in the source file (`Support.jsx`). This is a code smell that should not be "fixed" without auditing every downstream artifact (documentation, comments, error messages).
 
 ---
 
@@ -333,12 +330,6 @@ The following table lists every source file referenced by this document, with li
 - [Route Guards](./route-guards.md) — coverage of the imperative guards in `Weather.jsx:36-38` and `ForecastWeather.jsx:44-46` (referenced from [§3](#3-the-route-table) and [§6.3](#63-what-notfound-does))
 - [Page Redirects](./page-redirects.md) — exhaustive catalog of every internal, external, and fallback redirect (referenced from [§6.3](#63-what-notfound-does) and [§7](#7-route-topology-diagram))
 - [Routing README](./README.md) — entry point for the routing documentation set
-
-### 8.2 Cross-Reference to External Technical Specification
-
-- [Technical Specifications §7.6.1](../../blitzy/documentation/Technical%20Specifications.md) — historical (system-level) view of the routing surface; referenced for context, **not duplicated** here
-- [Technical Specifications §7.6.7](../../blitzy/documentation/Technical%20Specifications.md) — additional context on the `Support.jsx` naming quirk; referenced from [§4.1](#41-note-on-the-naming-quirk-for-support)
-- [Technical Specifications §7.11](../../blitzy/documentation/Technical%20Specifications.md) — existing user-flow diagrams; the diagrams here are routing-specific and complement (rather than replace) the existing user-flow material
 
 ---
 
