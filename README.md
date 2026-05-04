@@ -26,6 +26,12 @@
 
 [Visit the live application](https://zedd-weather.vercel.app)
 
+### Documentation
+
+For an in-depth understanding of how the application's routing works, see:
+
+- [Routing Documentation](docs/routing/README.md) — covers the route table, navigation mechanisms, page redirects, conditional routing, and route guards.
+
 ### Support
 
 Please support by starring this project. Follow me for more cool open-source projects.
