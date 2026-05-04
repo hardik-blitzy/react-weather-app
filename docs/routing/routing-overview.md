@@ -330,6 +330,7 @@ The following table lists every source file referenced by this document, with li
 - [Route Guards](./route-guards.md) — coverage of the imperative guards in `Weather.jsx:36-38` and `ForecastWeather.jsx:44-46` (referenced from [§3](#3-the-route-table) and [§6.3](#63-what-notfound-does))
 - [Page Redirects](./page-redirects.md) — exhaustive catalog of every internal, external, and fallback redirect (referenced from [§6.3](#63-what-notfound-does) and [§7](#7-route-topology-diagram))
 - [Routing README](./README.md) — entry point for the routing documentation set
+- [Technical Specifications §7.6.1](../../blitzy/documentation/Technical%20Specifications.md) — system-level technical specification including the route table at §7.6.1 and user flow diagrams at §7.11
 
 ---
 

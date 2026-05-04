@@ -476,32 +476,32 @@ flowchart LR
     Index -.->|HOME_PAGE_SEEN falsy<br/>App.js:13-17| Home
 
     %% Outgoing from Home
-    Home -->|navigate(&quot;weather&quot;)<br/>Home.jsx:69| Weather
+    Home -->|"navigate(&quot;weather&quot;)<br/>Home.jsx:69"| Weather
     Home -->|window.location.href<br/>fallback Home.jsx:72| Weather
 
     %% Outgoing from Weather
-    Weather -->|guard navigate(&quot;/&quot;)<br/>Weather.jsx:37| Index
-    Weather -->|navigate(&quot;/forecast&quot;)<br/>Weather.jsx:55, 88, 133| Forecast
-    Weather -->|navigate(&quot;weathermain&quot;)<br/>Weather.jsx:119| WMain
+    Weather -->|"guard navigate(&quot;/&quot;)<br/>Weather.jsx:37"| Index
+    Weather -->|"navigate(&quot;/forecast&quot;)<br/>Weather.jsx:55, 88, 133"| Forecast
+    Weather -->|"navigate(&quot;weathermain&quot;)<br/>Weather.jsx:119"| WMain
 
     %% Outgoing from WeatherMain
-    WMain -->|navigate(&quot;/weather&quot;)<br/>WeatherMain.jsx:26| Weather
+    WMain -->|"navigate(&quot;/weather&quot;)<br/>WeatherMain.jsx:26"| Weather
 
     %% Outgoing from ForecastWeather
-    Forecast -->|guard navigate(&quot;/&quot;)<br/>ForecastWeather.jsx:45| Index
-    Forecast -->|navigate(&quot;/weather&quot;)<br/>ForecastWeather.jsx:252| Weather
+    Forecast -->|"guard navigate(&quot;/&quot;)<br/>ForecastWeather.jsx:45"| Index
+    Forecast -->|"navigate(&quot;/weather&quot;)<br/>ForecastWeather.jsx:252"| Weather
 
     %% Outgoing from Settings
-    Settings -->|navigate(&quot;./weather&quot;)<br/>Settings.jsx:10| Weather
-    Settings -->|restoreFactorySettings<br/>navigate(&quot;/&quot;)<br/>settings.js:98, 102| Index
+    Settings -->|"navigate(&quot;./weather&quot;)<br/>Settings.jsx:10"| Weather
+    Settings -->|"restoreFactorySettings<br/>navigate(&quot;/&quot;)<br/>settings.js:98, 102"| Index
     Settings -.->|window.location.href fallback<br/>settings.js:105| Index
 
     %% Outgoing from Support
-    Support -->|navigate(&quot;./weather&quot;)<br/>Support.jsx:8| Weather
-    Support -->|navigate(github URL)<br/>Support.jsx:12, 16| Github
+    Support -->|"navigate(&quot;./weather&quot;)<br/>Support.jsx:8"| Weather
+    Support -->|"navigate(github URL)<br/>Support.jsx:12, 16"| Github
 
     %% Outgoing from NotFound
-    NotFound -->|navigate(&quot;/weather&quot;)<br/>404.jsx:8| Weather
+    NotFound -->|"navigate(&quot;/weather&quot;)<br/>404.jsx:8"| Weather
 
     %% Footer-driven (multi-source, abbreviated)
     Settings -.->|footer App<br/>footerNav.jsx:6| Weather
