@@ -2,803 +2,457 @@
 
 # 0. Agent Action Plan
 
-## 0.1 Executive Summary
+## 0.1 Executive Summary and Intent Clarification
 
-Based on the provided requirements, the Blitzy platform understands that the user requests the addition of a health check endpoint to the React Weather Application to enable service availability verification. This is a **feature addition** task that transforms the application from a purely static-served SPA to one with a lightweight server component capable of responding to health monitoring requests.
+### 0.1.1 User Prompt Verbatim
 
-### 0.1.1 Change Classification
+The user's prompt is preserved here without paraphrase to anchor every interpretation that follows:
 
-| Aspect | Classification |
-|--------|----------------|
-| **Change Type** | Feature Addition |
-| **Scope** | Infrastructure / Server Layer |
-| **Complexity** | Low-Medium |
-| **Risk Level** | Low |
-| **Breaking Changes** | None |
+> "Choose from your saved rules so every generation follows the same standards automatically. You can also create a new one if needed."
 
-### 0.1.2 Core Objective
+The user-supplied metadata is also preserved verbatim: zero attachments, zero environment instructions, an empty list of environment variable names (`[]`), an empty list of secret names (`[]`), and an empty list of implementation rules (`[]`).
 
-The primary objective is to create a server-side health check endpoint (`/health` or `/health_check`) that:
-- Returns HTTP 200 status code when the service is operational
-- Provides JSON payload with service health information (uptime, status, timestamp)
-- Enables integration with monitoring tools, load balancers, and orchestration systems (Kubernetes, Jenkins)
-- Maintains backward compatibility with the existing React SPA functionality
+### 0.1.2 Core Refactoring Objective
 
-### 0.1.3 Technical Approach Summary
+Based on the prompt, the Blitzy platform understands that the literal text supplied is meta-instructional guidance describing how to use a "saved rules" selector in the project-creation interface so that future code generations apply consistent coding standards. The text is procedural UI copy directed at the human user of the rule-management feature; it is not a refactoring directive against the source tree of `react-weather-app` [package.json:L2] documented elsewhere in this Technical Specification [1.1.1 Project Overview, "react-weather-app" identification].
 
-The implementation requires transitioning from the current `serve` static file server to a custom Express.js server that:
-1. Serves the production React build as static files
-2. Exposes a dedicated `/health` endpoint for health monitoring
-3. Integrates seamlessly with the existing Jenkins CI/CD pipeline
+Translated to refactoring terminology, the prompt does NOT specify any of the elements that a code-level refactoring objective requires:
 
-### 0.1.4 Key Deliverables
+| Required Refactoring Element | Provided in User Prompt? | Evidence |
+|------------------------------|--------------------------|----------|
+| Refactoring type (structure / pattern / performance / modularity / migration) | NO | Prompt names no refactoring category |
+| Source artifact (module, file, class, API) | NO | Prompt cites no path under `src/`, `server.js`, `package.json`, or any other location |
+| Target architecture | NO | Prompt names no target stack, framework, or topology |
+| Target repository (same vs. new) | NO | Prompt names no migration destination |
+| Behavioral preservation guarantees (e.g., maintain public API contracts) | NO | Prompt issues no preservation directive |
+| Design system or component library | NO | Prompt names no library, no Figma reference, no token system |
+| Performance or scalability targets | NO | Prompt sets no metrics, no SLOs, no benchmarks |
+| Files to add / update / delete | NO | Prompt enumerates no paths |
+| Acceptance criteria | NO | Prompt declares no validation gates |
 
-| Deliverable | Type | Description |
-|-------------|------|-------------|
-| `server.js` | CREATE | Express server with health endpoint and static file serving |
-| `package.json` | UPDATE | Add Express dependency |
-| `scripts/deploy-for-production.sh` | UPDATE | Replace `serve` with custom server |
-| Health endpoint documentation | CREATE | API documentation for `/health` endpoint |
+Refactoring type classification: `[INDETERMINATE — no refactoring directive supplied]`. The five refactoring categories (Code structure, Design pattern, Performance, Modularity, Tech stack migration) cannot be assigned because none is described.
 
+Target repository classification: `[INDETERMINATE — no migration target supplied]`. The two repository targeting options (Same repository, New repository migration) cannot be assigned because the prompt names neither.
 
-## 0.2 Intent Clarification
+### 0.1.3 Technical Interpretation
 
-### 0.2.1 User Requirement Statement
+This refactoring translates to the following technical transformation strategy: there is no transformation strategy to translate, because the prompt does not authorize a transformation. The Blitzy platform's faithful interpretation is that the user has either:
 
-**Original Request:**
-> "Could you please add a health_check endpoint to the project so that we can easily verify that the service is running correctly"
+- **(Interpretation A — most likely)** Pasted UI copy from a rules-management screen as the project description by accident, in which case the correct downstream action is to halt code generation and request a concrete refactoring directive from the user.
+- **(Interpretation B — possible but unsupported by the codebase)** Intended to request the addition of a "saved rules" feature to the application itself. This interpretation is not supported by the existing system: `react-weather-app` is a weather-forecast Single Page Application <cite index="...">with no rules-management surface, no rule storage, and no code-generation pipeline</cite> — the closest user-preference surfaces in the app are `Settings.jsx` and the `Database` `localStorage` wrapper [src/backend/database.js:L1-L40], and these manage weather-related preferences (default location, units, tracking flag), not generation rules.
 
-### 0.2.2 Interpreted Requirements
+Because Interpretation A is overwhelmingly the more reasonable reading of the literal text, this Agent Action Plan is structured as a **transparent, no-op-by-default refactoring plan**: it documents the existing system baseline so that any clarified directive can be attached to it in a follow-up iteration, and it explicitly refrains from fabricating goals, files, transformations, or dependency changes that the user did not authorize.
 
-The Blitzy platform interprets this request as follows:
+### 0.1.4 Clarification Required Before Code Generation
 
-| Requirement ID | Interpreted Requirement | Confidence |
-|----------------|------------------------|------------|
-| REQ-001 | Create an HTTP endpoint that responds to health check requests | High |
-| REQ-002 | Endpoint should return HTTP 200 when service is healthy | High |
-| REQ-003 | Response should confirm the service is "running correctly" | High |
-| REQ-004 | Endpoint must be easily accessible (simple path like `/health`) | Medium |
-| REQ-005 | Should be usable for automated monitoring/verification | Inferred |
+For Blitzy to execute a refactor in subsequent iterations, the user must supply at minimum the following clarifications. This list is provided to guide the next prompt, not to assume an answer:
 
-### 0.2.3 Implicit Requirements Discovered
+- **Refactoring goal**: One concrete sentence describing what should change about the running system (for example: "Migrate from Bootstrap 5 to Tailwind CSS", "Replace jQuery AJAX in `src/apis/*.js` with `fetch`", "Convert `server.js` from CommonJS to ES Modules", "Migrate from Create React App to Vite", "Extract the `Database` class into a generic key/value adapter so a future IndexedDB backend can plug in").
+- **Scope envelope**: The folders, paths, or wildcard patterns that ARE in scope, and explicitly named items that are OUT of scope.
+- **Behavioral invariants**: Which behaviors must be preserved bit-for-bit (e.g., the `GET /health` JSON contract documented in `README.md` [README.md:L25-L60] and `server.js` [server.js:L16-L30]) and which may change.
+- **Acceptance criteria**: How completion will be verified (build success, test pass, manual route walkthrough, lighthouse score, etc.).
+- **Constraints inherited from existing rules**: Whether the previously-recorded rule that prohibited frontend source changes during the `/health` server-tier work [3.1.1 — "RULE-007"] still applies, and whether other RULE-001 through RULE-008 constraints should govern this iteration.
 
-Based on codebase analysis, the following implicit requirements have been identified:
+### 0.1.5 Implicit Requirements Surfaced
 
-- **Server Component Required**: The current architecture uses `serve` (a static file server) which cannot handle custom endpoints. An Express.js server must be introduced to fulfill this requirement.
-- **Static File Serving Preservation**: The server must continue serving the React SPA production build from the `build/` directory.
-- **Port Compatibility**: The current deployment uses port 5000; this must remain unchanged.
-- **CI/CD Integration**: The deployment script `scripts/deploy-for-production.sh` must be updated to use the new server.
-- **No Database Dependency**: Health check should not require database connectivity (localStorage is client-side only).
+Even with no directive, two implicit requirements are intrinsic to the act of generating an Agent Action Plan and are surfaced here so they remain visible to downstream stages:
 
-### 0.2.4 Requirement Clarifications
+- **Do no harm**: In the absence of a directive, no file in this repository may be modified, created, or deleted by downstream code generation. The actionable in-scope set is empty (Section 0.2).
+- **Honest reporting**: This AAP must report what the prompt says and does not say. Where the prompt is silent, downstream agents must read silence as silence — not as authorization to invent.
 
-| Aspect | Assumed Interpretation | Rationale |
-|--------|----------------------|-----------|
-| Endpoint Path | `/health` (standard) | Industry standard; user said "health_check" but `/health` is conventional |
-| Response Format | JSON | Best practice for programmatic consumption |
-| Authentication | None required | Health endpoints are typically public for monitoring tools |
-| Response Content | Status, uptime, timestamp | Standard health check payload components |
+## 0.2 Technical Scope and Boundaries
 
+### 0.2.1 Scope Determination
 
-## 0.3 Technical Context Analysis
+Because the user prompt issues no refactoring directive (Section 0.1), the actionable scope of this iteration is empty. The Blitzy platform must therefore treat every file in the repository as **out of scope** until a follow-up clarification names specific files or wildcard patterns to refactor.
 
-### 0.3.1 Current Architecture Assessment
+This sub-section documents the empty in-scope set explicitly, so that downstream code generation cannot mistake silence for permission. It also enumerates the candidate paths that exist in the repository — these candidates are NOT in scope; they are listed only so that a future clarified directive can attach to them without requiring re-discovery.
 
-Repository analysis reveals a **client-side-only Single Page Application (SPA)** with no existing backend server component.
+### 0.2.2 Exhaustively In Scope
 
-```mermaid
-graph LR
-    subgraph "Current Architecture"
-        A[React SPA] -->|Static Build| B[serve Package]
-        B -->|Port 5000| C[Browser]
-        A -->|API Calls| D[OpenWeatherMap API]
-        A -->|Storage| E[localStorage]
-    end
-```
-
-**Key Architectural Findings:**
-
-| Component | Status | Location |
-|-----------|--------|----------|
-| Frontend Framework | React (CRA) | `src/` |
-| Build Output | Static files | `build/` |
-| Production Server | `serve` static server | `scripts/deploy-for-production.sh` |
-| Backend Server | **NOT PRESENT** | N/A |
-| API Layer | Client-side only | `src/apis/` |
-| Data Persistence | localStorage | `src/backend/` |
-
-### 0.3.2 Architectural Gap Analysis
-
-The current `serve -s build -l 5000` deployment approach creates a fundamental limitation:
-
-```mermaid
-graph TB
-    subgraph "Current Limitation"
-        A[serve Package] -->|Can Only| B[Serve Static Files]
-        A -->|Cannot| C[Handle Custom Endpoints]
-        A -->|Cannot| D[Execute Server Logic]
-    end
-    
-    subgraph "Required Capability"
-        E[Express Server] -->|Can| F[Serve Static Files]
-        E -->|Can| G[Handle /health Endpoint]
-        E -->|Can| H[Execute Server Logic]
-    end
-```
-
-**Gap Summary:**
-- **Gap Identified**: No mechanism exists to respond to custom HTTP endpoints
-- **Impact**: Health check endpoint cannot be implemented without server changes
-- **Resolution**: Introduce Express.js server to replace `serve` package
-
-### 0.3.3 Technology Stack Context
-
-From `package.json` analysis:
-
-| Dependency | Version | Relevance |
-|------------|---------|-----------|
-| react | ^17.0.2 | Frontend framework |
-| react-scripts | 4.0.3 | Build tooling |
-| serve | (implicit) | Current static server |
-| express | **Not installed** | Required for health endpoint |
-
-**CI/CD Context (from tech spec section 8.6):**
-- Jenkins pipeline with `node:lts-alpine` Docker agent (Node 18.x)
-- Shell script deployment via `scripts/` directory
-- Production deployment uses `deploy-for-production.sh`
-
-### 0.3.4 Monitoring Context
-
-From tech spec section 6.5 (Monitoring and Observability):
-> "Detailed Monitoring Architecture is NOT applicable to this project due to its client-side-only nature"
-
-This health check endpoint implementation will:
-- Enable server-side monitoring capability for the first time
-- Provide integration points for Kubernetes liveness probes
-- Support external uptime monitoring services
-
-
-## 0.4 Implementation Design
-
-### 0.4.1 Target Architecture
-
-The implementation introduces a minimal Express.js server layer:
-
-```mermaid
-graph LR
-    subgraph "New Architecture"
-        A[React SPA] -->|Build| B[build/ Directory]
-        C[Express Server] -->|Serves| B
-        C -->|Exposes| D[/health Endpoint]
-        C -->|Port 5000| E[Browser/Monitoring]
-        A -->|API Calls| F[OpenWeatherMap API]
-        A -->|Storage| G[localStorage]
-    end
-```
-
-### 0.4.2 Health Endpoint Specification
-
-**Endpoint Details:**
-
-| Property | Value |
-|----------|-------|
-| Path | `/health` |
-| Method | GET |
-| Authentication | None |
-| Content-Type | application/json |
-| Success Status | 200 OK |
-| Error Status | 503 Service Unavailable |
-
-**Response Schema:**
-```json
-{
-  "status": "ok",
-  "uptime": 12345.67,
-  "timestamp": "2024-01-15T10:30:00.000Z"
-}
-```
-
-### 0.4.3 Server Implementation Strategy
-
-The Express server will be implemented with the following design principles:
-
-**Core Functionality:**
-- Serve static files from `build/` directory
-- Expose `/health` endpoint with JSON response
-- Handle SPA routing by serving `index.html` for all unmatched routes
-- Graceful error handling
-
-**Implementation Pattern:**
-```javascript
-// server.js - Simplified structure
-const express = require('express');
-const app = express();
-// Health endpoint + Static serving
-```
-
-### 0.4.4 Component Interaction Design
-
-```mermaid
-sequenceDiagram
-    participant M as Monitoring Tool
-    participant S as Express Server
-    participant B as Build Directory
-    participant U as User Browser
-    
-    Note over M,S: Health Check Flow
-    M->>S: GET /health
-    S->>S: Calculate uptime
-    S->>M: 200 OK { status, uptime }
-    
-    Note over U,B: SPA Serving Flow
-    U->>S: GET /any-route
-    S->>B: Serve index.html
-    B->>U: React SPA loads
-```
-
-### 0.4.5 Deployment Script Modification Strategy
-
-**Current Flow:**
-```
-npm install serve → serve -s build -l 5000
-```
-
-**New Flow:**
-```
-npm install → node server.js
-```
-
-The deployment script transformation ensures:
-- Express and its dependencies are installed
-- The custom server starts instead of `serve`
-- Port 5000 remains the listening port
-- Process management remains unchanged
-
-
-## 0.5 File Transformation Mapping
-
-### 0.5.1 Exhaustive File Transformation Table
-
-**Transformation Modes:**
-- **CREATE** - Create a new file
-- **UPDATE** - Modify an existing file
-- **DELETE** - Remove an obsolete file
-- **REFERENCE** - Use as a style/pattern reference
-
-| Target File | Mode | Source Reference | Detailed Changes |
-|-------------|------|------------------|------------------|
-| `server.js` | CREATE | N/A | New Express server with health endpoint and static file serving |
-| `package.json` | UPDATE | `package.json` | Add `express` dependency; update `start` script |
-| `scripts/deploy-for-production.sh` | UPDATE | `scripts/deploy-for-production.sh` | Replace `serve` with `node server.js` |
-| `README.md` | UPDATE | `README.md` | Add health endpoint documentation |
-
-### 0.5.2 New File Specifications
-
-## server.js (CREATE)
-
-**Purpose:** Express server providing health endpoint and static file serving
-
-**File Location:** Project root (`/server.js`)
-
-**Key Sections:**
-- Express application initialization
-- Health check endpoint handler (`/health`)
-- Static file middleware for `build/` directory
-- SPA fallback routing for client-side routing support
-- Server startup on port 5000
-
-**Dependencies Required:**
-- `express` (runtime dependency)
-- `path` (Node.js built-in)
-
-**Expected File Structure:**
-```
-server.js
-├── Module imports (express, path)
-├── App initialization
-├── Health endpoint definition
-├── Static file middleware
-├── SPA fallback route
-└── Server listen
-```
-
-### 0.5.3 Updated File Specifications
-
-## package.json (UPDATE)
-
-**Location:** Project root (`/package.json`)
-
-**Changes Required:**
-
-| Section | Current Value | New Value |
-|---------|---------------|-----------|
-| `dependencies.express` | Not present | `^4.21.2` |
-| `scripts.start` | `react-scripts start` | No change (dev mode) |
-| `scripts.serve` | Not present | `node server.js` |
-
-**Rationale for Express 4.21.2:**
-- Express 5.x requires Node 18+ (compatible with CI/CD)
-- Express 4.21.x is the current stable LTS branch
-- Widely documented and community-supported
-
-## scripts/deploy-for-production.sh (UPDATE)
-
-**Location:** `scripts/deploy-for-production.sh`
-
-**Current Content (relevant section):**
-```bash
-npm install -g serve
-serve -s build -l 5000
-```
-
-**New Content:**
-```bash
-npm install --production
-node server.js
-```
-
-**Changes:**
-- Remove `serve` global installation
-- Use local dependencies via `npm install --production`
-- Start custom Express server
-
-## README.md (UPDATE)
-
-**Location:** Project root (`/README.md`)
-
-**New Section to Add:**
-- Health Check Endpoint documentation
-- Endpoint path, method, response format
-- Usage examples with curl
-
-### 0.5.4 Files NOT Modified (Out of Scope)
-
-| File/Directory | Reason for Exclusion |
-|----------------|---------------------|
-| `src/**/*` | Frontend source - no changes required |
-| `public/**/*` | Static assets - no changes required |
-| `src/apis/**/*` | Client-side API calls - unaffected |
-| `src/backend/**/*` | localStorage wrappers - unaffected |
-| `scripts/run-tests.sh` | Test script - unaffected |
-| `scripts/run-sonar-analysis.sh` | Analysis script - unaffected |
-| `scripts/code-linter.sh` | Linter script - unaffected |
-
-
-## 0.6 Dependency Inventory
-
-### 0.6.1 New Dependencies Required
-
-| Registry | Package Name | Version | Purpose | License |
-|----------|--------------|---------|---------|---------|
-| npm | express | ^4.21.2 | Web framework for health endpoint and static serving | MIT |
-
-### 0.6.2 Dependency Rationale
-
-**Express.js Selection:**
-- Industry-standard Node.js web framework with extensive documentation
-- Minimal footprint suitable for health endpoint + static serving use case
-- Compatible with Node 18.x LTS used in CI/CD pipeline (`node:lts-alpine`)
-- Well-maintained with regular security updates
-
-**Version Selection (4.21.2):**
-- Latest stable release in the 4.x LTS branch
-- Express 5.x (5.2.1) is available but 4.x is more widely tested
-- Maintains compatibility with existing ecosystem
-
-### 0.6.3 Transitive Dependencies
-
-Express 4.21.x brings the following key transitive dependencies (managed automatically):
-
-| Package | Purpose |
-|---------|---------|
-| body-parser | Request body parsing |
-| content-type | Content-Type header parsing |
-| cookie | Cookie parsing |
-| debug | Debug logging |
-| depd | Deprecation warnings |
-| finalhandler | Final response handler |
-| fresh | HTTP cache validation |
-| merge-descriptors | Object merging |
-| methods | HTTP methods |
-| on-finished | Request/response cleanup |
-| parseurl | URL parsing |
-| path-to-regexp | Route pattern matching |
-| proxy-addr | Proxy address handling |
-| qs | Query string parsing |
-| range-parser | Range header parsing |
-| send | Static file sending |
-| serve-static | Static file middleware |
-| statuses | HTTP status codes |
-| type-is | Content type checking |
-| utils-merge | Object utilities |
-| vary | Vary header handling |
-
-### 0.6.4 Removed Dependencies
-
-| Package | Previous Purpose | Removal Rationale |
-|---------|-----------------|-------------------|
-| serve (global) | Static file serving | Replaced by Express with serve-static |
-
-### 0.6.5 Compatibility Matrix
-
-| Component | Required Version | Rationale |
-|-----------|-----------------|-----------|
-| Node.js | ≥14.x (18.x recommended) | Express 4.x compatibility; CI/CD uses node:lts-alpine |
-| npm | ≥6.x | Package installation |
-| Express | ^4.21.2 | Stable LTS with security patches |
-
-### 0.6.6 Security Considerations
-
-Express 4.21.2 includes:
-- Protection against common web vulnerabilities when properly configured
-- Regular security patches from the Express.js team
-- Community-vetted middleware ecosystem
-
-No additional security packages required for basic health endpoint functionality.
-
-
-## 0.7 Scope Boundaries
-
-### 0.7.1 Exhaustively In Scope
-
-**Server Components:**
-- `server.js` - New Express server file with health endpoint
-- `/health` endpoint implementation
-- Static file serving from `build/` directory
-- SPA routing fallback to `index.html`
-
-**Configuration Updates:**
-- `package.json` - Express dependency addition
-- `scripts/deploy-for-production.sh` - Deployment script modification
-
-**Documentation Updates:**
-- `README.md` - Health endpoint usage documentation
-
-**Affected Patterns:**
-- `server.js` - New file at project root
-- `package.json` - Dependencies section
-- `scripts/*.sh` - Deployment scripts only
-
-### 0.7.2 Explicitly Out of Scope
-
-**Frontend Source Code:**
-- `src/**/*.js` - No React component modifications
-- `src/**/*.css` - No styling changes
-- `src/apis/**/*` - No client-side API modifications
-- `src/backend/**/*` - No localStorage logic changes
-
-**Build Configuration:**
-- `public/**/*` - No static asset modifications
-- CRA configuration - No ejection or customization
-
-**Testing Infrastructure:**
-- `scripts/run-tests.sh` - Unchanged
-- Test files - No new server tests in this scope
-- `scripts/run-sonar-analysis.sh` - Unchanged
-
-**Other Scripts:**
-- `scripts/code-linter.sh` - Unchanged
-- `scripts/check-node-version.sh` - Unchanged
-
-**External Integrations:**
-- OpenWeatherMap API configuration - Unchanged
-- Geolocation API usage - Unchanged
-
-**Database/Storage:**
-- localStorage implementation - Unchanged (no server-side storage introduced)
-
-### 0.7.3 Boundary Justification
-
-| Boundary | Rationale |
-|----------|-----------|
-| No frontend changes | Health endpoint is server-side only; React SPA continues unchanged |
-| No test additions | Health endpoint testing can be done manually or in future iteration |
-| No database | Application uses localStorage; no server-side persistence needed |
-| No authentication | Health endpoints are conventionally public for monitoring integration |
-| No HTTPS configuration | Handled by reverse proxy/load balancer in production |
-
-### 0.7.4 Future Considerations (Not In Current Scope)
-
-These items are intentionally excluded but may be addressed in future iterations:
-
-| Item | Reason for Exclusion |
-|------|---------------------|
-| Comprehensive monitoring dashboard | Beyond minimal health check requirement |
-| Health check authentication | Not specified in requirements |
-| Kubernetes probe configuration | Infrastructure-specific; out of application scope |
-| Server-side logging | Minimal implementation; future enhancement |
-| Health check tests | Can be added in subsequent development cycle |
-| Metrics endpoint (`/metrics`) | Not requested; future Prometheus integration |
-
-
-## 0.8 Validation Criteria
-
-### 0.8.1 Acceptance Criteria
-
-The implementation will be considered successful when all of the following criteria are met:
-
-| Criterion ID | Description | Verification Method |
-|--------------|-------------|---------------------|
-| AC-001 | `/health` endpoint returns HTTP 200 status | `curl -I http://localhost:5000/health` |
-| AC-002 | Response body contains JSON with `status: "ok"` | `curl http://localhost:5000/health` |
-| AC-003 | Response includes `uptime` in seconds | Parse JSON response |
-| AC-004 | Response includes `timestamp` in ISO format | Parse JSON response |
-| AC-005 | React SPA loads correctly at root path | Browser navigation to `http://localhost:5000/` |
-| AC-006 | SPA client-side routing works | Navigate to `/settings`, `/saved-locations` |
-| AC-007 | Server runs on port 5000 | `netstat -an \| grep 5000` |
-| AC-008 | `npm install` succeeds without errors | Clean install in CI environment |
-
-### 0.8.2 Health Endpoint Test Cases
-
-**Test Case 1: Basic Health Check**
-```bash
-curl -X GET http://localhost:5000/health
-```
-Expected Response:
-```json
-{"status":"ok","uptime":123.45,"timestamp":"..."}
-```
-Expected Status: `200 OK`
-
-**Test Case 2: Health Check Headers**
-```bash
-curl -I http://localhost:5000/health
-```
-Expected Headers:
-- `Content-Type: application/json`
-- `HTTP/1.1 200 OK`
-
-**Test Case 3: Invalid Endpoint**
-```bash
-curl -X GET http://localhost:5000/nonexistent-api
-```
-Expected: Returns `index.html` (SPA fallback behavior)
-
-### 0.8.3 SPA Functionality Validation
-
-| Test | Action | Expected Result |
-|------|--------|-----------------|
-| Homepage | Navigate to `/` | Weather app loads |
-| Settings | Navigate to `/settings` | Settings page renders |
-| Saved Locations | Navigate to `/saved-locations` | Locations page renders |
-| Deep Link | Direct access to `/settings` | SPA loads and navigates |
-| Static Assets | Check CSS/JS loading | All assets load correctly |
-
-### 0.8.4 Deployment Validation
-
-| Validation Point | Command/Action | Success Criteria |
-|------------------|----------------|------------------|
-| Script Syntax | `bash -n scripts/deploy-for-production.sh` | No syntax errors |
-| Dependencies Install | `npm install --production` | Exit code 0 |
-| Server Start | `node server.js` | Server listening message |
-| Port Binding | Process binds to 5000 | No EADDRINUSE error |
-
-### 0.8.5 Performance Baseline
-
-Health endpoint performance expectations:
-
-| Metric | Target | Rationale |
-|--------|--------|-----------|
-| Response Time | < 10ms | No I/O operations in health check |
-| Memory Impact | Negligible | Minimal Express footprint |
-| CPU Impact | Negligible | Simple JSON response |
-
-
-## 0.9 Execution Parameters
-
-### 0.9.1 Build and Run Commands
-
-**Development Mode (unchanged):**
-```bash
-npm start  # Runs react-scripts start on port 3000
-```
-
-**Production Build:**
-```bash
-npm run build  # Generates static files in build/
-```
-
-**Production Server:**
-```bash
-node server.js  # Runs Express server on port 5000
-```
-
-**Health Check Verification:**
-```bash
-curl http://localhost:5000/health
-```
-
-### 0.9.2 Environment Configuration
-
-| Variable | Value | Purpose |
-|----------|-------|---------|
-| PORT | 5000 | Server listening port (default, configurable) |
-| NODE_ENV | production | Runtime environment indicator |
-
-### 0.9.3 CI/CD Integration Points
-
-**Jenkins Pipeline Compatibility:**
-
-The implementation maintains compatibility with the existing Jenkins pipeline:
-
-```mermaid
-graph LR
-    A[Git Clone] --> B[npm install]
-    B --> C[npm run build]
-    C --> D[node server.js]
-    D --> E[Health Check Verification]
-```
-
-**Docker Agent Compatibility:**
-- Image: `node:lts-alpine` (Node 18.x)
-- Working directory: `/app`
-- No additional system dependencies required
-
-### 0.9.4 Monitoring Integration
-
-**Kubernetes Liveness Probe Example:**
-```yaml
-livenessProbe:
-  httpGet:
-    path: /health
-    port: 5000
-  initialDelaySeconds: 5
-  periodSeconds: 10
-```
-
-**Load Balancer Health Check:**
-- Path: `/health`
-- Port: 5000
-- Protocol: HTTP
-- Expected Status: 200
-
-### 0.9.5 Graceful Shutdown Handling
-
-The server implementation should support graceful shutdown:
-
-```javascript
-process.on('SIGTERM', () => {
-  server.close(() => process.exit(0));
-});
-```
-
-This enables:
-- Clean shutdown during deployments
-- Proper connection draining
-- Zero-downtime updates in orchestrated environments
-
-
-## 0.10 Implementation Rules
-
-### 0.10.1 Mandatory Implementation Rules
-
-The following rules MUST be adhered to during implementation:
-
-| Rule ID | Rule Description | Rationale |
-|---------|------------------|-----------|
-| RULE-001 | Health endpoint MUST return HTTP 200 for healthy state | Standard health check convention |
-| RULE-002 | Health endpoint MUST return JSON content type | Programmatic parsing by monitoring tools |
-| RULE-003 | Server MUST listen on port 5000 | Maintain backward compatibility with existing deployment |
-| RULE-004 | Server MUST serve static files from `build/` directory | Preserve React SPA functionality |
-| RULE-005 | All non-API routes MUST fall back to `index.html` | Enable SPA client-side routing |
-| RULE-006 | Express version MUST be 4.21.x | Stability and LTS compatibility |
-| RULE-007 | No frontend source code modifications | Health check is server-side only |
-| RULE-008 | Deployment script MUST NOT use global npm installs | Use local dependencies for reproducibility |
-
-### 0.10.2 Code Quality Standards
-
-| Standard | Requirement |
-|----------|-------------|
-| Error Handling | Wrap endpoint logic in try-catch |
-| Logging | Console log server startup message |
-| Comments | Document endpoint purpose |
-| Naming | Use lowercase with hyphens for routes (`/health`) |
-| Response Format | Consistent JSON structure |
-
-### 0.10.3 Security Rules
-
-| Rule | Implementation |
-|------|----------------|
-| No sensitive data in health response | Only status, uptime, timestamp |
-| No authentication required | Health endpoints should be accessible by monitoring systems |
-| No request body processing | GET-only endpoint |
-| Helmet middleware optional | Can be added for additional security headers |
-
-### 0.10.4 Compatibility Rules
-
-| Rule | Description |
-|------|-------------|
-| Node.js 14+ | Minimum supported version |
-| Node.js 18.x | Recommended (matches CI/CD) |
-| Express 4.x | Required version range |
-| No TypeScript | Match existing JavaScript codebase |
-
-### 0.10.5 Testing Rules
-
-| Rule | Description |
-|------|-------------|
-| Manual verification required | Verify health endpoint after deployment |
-| Automated tests optional | Can be added in future iteration |
-| CI/CD health check | Add verification step to deployment |
-
-
-## 0.11 References
-
-### 0.11.1 Repository Files Analyzed
-
-| File Path | Purpose | Key Findings |
-|-----------|---------|--------------|
-| `package.json` | Dependency manifest | React 17, react-scripts 4.0.3, no Express |
-| `README.md` | Project documentation | Client-side-only SPA, no backend |
-| `scripts/deploy-for-production.sh` | Production deployment | Uses `serve -s build -l 5000` |
-| `src/App.js` | Main React component | React Router routes defined |
-| `src/apis/getCurrentWeather.js` | Weather API client | Client-side fetch to OpenWeatherMap |
-| `src/apis/getGeolocation.js` | Geolocation API | Browser Geolocation API usage |
-| `src/apis/getWeatherForecast.js` | Forecast API client | Client-side fetch |
-| `src/backend/app_backend.js` | Backend stub | localStorage wrapper functions |
-| `src/backend/database.js` | Data persistence | localStorage implementation |
-| `src/backend/settings.js` | Settings management | localStorage settings |
-| `public/index.html` | HTML template | SPA entry point |
-| `public/manifest.json` | PWA manifest | App metadata |
-
-### 0.11.2 Technical Specification Sections Referenced
-
-| Section | Content | Relevance |
-|---------|---------|-----------|
-| 5.1 High-Level Architecture | Client-side-only SPA design | Confirmed no existing backend |
-| 6.5 Monitoring and Observability | Monitoring NOT applicable | Health endpoint enables monitoring |
-| 8.2 Deployment Environment | Static hosting (Vercel) | Understanding deployment context |
-| 8.6 CI/CD Pipeline | Jenkins with node:lts-alpine | Compatibility requirements |
-
-### 0.11.3 External Resources Consulted
-
-| Resource | URL | Information Retrieved |
-|----------|-----|----------------------|
-| Express.js npm | https://www.npmjs.com/package/express | Latest version: 5.2.1 (4.21.x recommended for stability) |
-| Express Health Checks Guide | https://expressjs.com/en/advanced/healthcheck-graceful-shutdown.html | Official Express health check documentation |
-| LogRocket Health Check Tutorial | https://blog.logrocket.com/how-to-implement-a-health-check-in-node-js/ | Health check implementation patterns |
-| Hyperping Health Check Guide | https://hyperping.com/blog/how-to-add-a-nodejs-health-check-endpoint-using-express | Express health endpoint best practices |
-| Red Hat Developer Guide | https://developers.redhat.com/learning/learn:openshift:develop-cloud-native-nodejs-applications-expressjs/resource/resources:add-health-checks-your-application | Kubernetes liveness probe integration |
-
-### 0.11.4 Search Queries Executed
-
-| Search Type | Query | Results Used |
-|-------------|-------|--------------|
-| Repository Search | Health check or status endpoint implementation | No existing implementation found |
-| Repository Search | Server file for serving static files or handling HTTP requests | No server files found |
-| Web Search | Express.js health check endpoint best practices 2024 | Implementation patterns |
-| Web Search | express npm package latest version 2024 | Version 5.2.1 / 4.21.x |
-
-### 0.11.5 Folder Structure Examined
+| Category | Path or Pattern | Status |
+|----------|-----------------|--------|
+| Source transformations | — | None requested |
+| Test updates | — | None requested |
+| Configuration updates | — | None requested |
+| Documentation updates | — | None requested |
+| Import corrections | — | None requested |
+| Rule-mandated files | — | None — user-specified rules list is empty (`[]`) |
+
+**The actionable in-scope set is `{}` (empty).**
+
+### 0.2.3 Explicitly Out of Scope
+
+Every file and folder in the repository is out of scope for this iteration. The following enumeration is provided for completeness, drawn from the discovery inventory [Section 0.8.2 — Search Log]:
+
+| Path | Type | Status |
+|------|------|--------|
+| `server.js` | File | OUT OF SCOPE — no refactor directive [server.js:L1-L71] |
+| `package.json` | File | OUT OF SCOPE — no dependency change requested [package.json:L1-L51] |
+| `package-lock.json` | File | OUT OF SCOPE — no dependency change requested |
+| `README.md` | File | OUT OF SCOPE — no documentation change requested [README.md:L1-L80] |
+| `public/index.html` | File | OUT OF SCOPE — no shell change requested |
+| `public/manifest.json` | File | OUT OF SCOPE — no PWA metadata change requested |
+| `public/robots.txt` | File | OUT OF SCOPE — no crawl policy change requested |
+| `src/index.js` | File | OUT OF SCOPE — no bootstrap change requested |
+| `src/App.js` | File | OUT OF SCOPE — no router change requested [src/App.js:L1-L34] |
+| `src/App.test.js` | File | OUT OF SCOPE — no test change requested |
+| `src/autoload.js` | File | OUT OF SCOPE — no asset autoload change requested |
+| `src/reportWebVitals.js` | File | OUT OF SCOPE — no telemetry change requested |
+| `src/service-worker.js` | File | OUT OF SCOPE — no PWA worker change requested |
+| `src/serviceWorkerRegistration.js` | File | OUT OF SCOPE — no PWA registration change requested |
+| `src/setupTests.js` | File | OUT OF SCOPE — no test bootstrap change requested |
+| `src/apis/getCurrentWeather.js` | File | OUT OF SCOPE — no API integration change requested |
+| `src/apis/getGeolocation.js` | File | OUT OF SCOPE — no geolocation change requested |
+| `src/apis/getWeatherForecast.js` | File | OUT OF SCOPE — no forecast change requested |
+| `src/backend/app_backend.js` | File | OUT OF SCOPE — no singleton change requested |
+| `src/backend/database.js` | File | OUT OF SCOPE — no persistence change requested |
+| `src/backend/settings.js` | File | OUT OF SCOPE — no settings handler change requested |
+| `src/components/*.jsx` (9 files) | Files | OUT OF SCOPE — no component change requested |
+| `src/inc/scripts/utilities.js` | File | OUT OF SCOPE — no utility change requested |
+| `src/inc/scripts/script.js` | File | OUT OF SCOPE — no init script change requested |
+| `src/inc/styles/style.css` | File | OUT OF SCOPE — no styling change requested |
+| `src/inc/styles/overScrollStyles.css` | File | OUT OF SCOPE — no styling change requested |
+| `src/inc/styles/three-dots.css` | File | OUT OF SCOPE — third-party vendored, no change requested |
+| `src/pages/*.jsx` (7 files) | Files | OUT OF SCOPE — no route-level page change requested |
+| `scripts/*.sh` (4 files) | Files | OUT OF SCOPE — no operational script change requested |
+| `blitzy/documentation/*.md` | Files | OUT OF SCOPE — no documentation change requested |
+| `.vscode/*` | Files | OUT OF SCOPE — IDE workspace settings, untouched |
+
+### 0.2.4 Design System Compliance Sub-Section Status
+
+The Design System Alignment Protocol does **not** apply to this iteration. The user prompt names no component library, no design system, no proprietary in-repo system, and no Figma deliverable. Consequently, no system identification, component mapping, token mapping, gaps inventory, or compliance summary is produced.
+
+For factual context only (not a directive), the existing codebase incidentally uses the following UI primitives, none of which are being conformed-to or migrated-from in this iteration:
+
+- **Bootstrap 5.3.6** [package.json:L11] — referenced via `src/autoload.js` (Bootstrap CSS/JS imports) [referenced in 1.1 EXECUTIVE SUMMARY context summary]
+- **jQuery 3.7.1** + **jQuery Mobile 1.5.0-alpha.1** [package.json:L17-L18] — used inside `src/inc/scripts/utilities.js`, `src/apis/*.js`, `src/components/utilityFooterComponet.jsx`, and `src/backend/settings.js`
+- **SweetAlert2 11.12.1** [package.json:L23] — used for modal dialogs and toasts in pages and settings handlers
+- **Project-local CSS tokens** in `src/inc/styles/style.css` (poppins font, brand color custom properties, branded button classes) — see project-local design surface [3.1.2 Markup and Styling Languages]
+
+If a future clarified directive requires migration to a named design system (e.g., Tailwind, Material UI, Ant Design, Shadcn/ui), the Design System Compliance sub-section will be authored at that time per the protocol.
+
+## 0.3 Target Design
+
+### 0.3.1 Target Design Determination
+
+A target architecture cannot be designed for this iteration because the prompt does not name one (Section 0.1). This sub-section documents the **observed baseline** as the reference point that any future clarified directive will refactor against. The baseline is recorded in the present tense — it describes what exists, not what is being proposed.
+
+### 0.3.2 Refactored Structure Planning
+
+No refactored structure is proposed. The target tree below is the **current tree**, presented so that a future directive can attach to it without re-discovery. Each entry annotates whether the file belongs to the server tier, client tier, persistence tier, build/operations layer, or documentation layer:
 
 ```
-/ (root)
-├── .vscode/          # Editor configuration
-├── public/           # Static assets (index.html, manifest.json)
-├── scripts/          # CI/CD shell scripts
-│   ├── check-node-version.sh
-│   ├── code-linter.sh
-│   ├── deploy-for-production.sh    ← Key file for modification
-│   ├── run-sonar-analysis.sh
-│   └── run-tests.sh
-├── src/              # React source code
-│   ├── apis/         # Client-side API calls
-│   ├── backend/      # localStorage wrappers
-│   ├── components/   # React components
-│   ├── App.js        # Main application
-│   └── service-worker.js
-├── package.json      ← Key file for modification
-└── README.md         ← Documentation update
+react-weather-app/
+├── package.json                          (npm manifest, dependencies, scripts) [package.json:L1-L51]
+├── package-lock.json                     (deterministic dependency snapshot)
+├── README.md                             (human-facing overview, /health contract) [README.md:L1-L80]
+├── server.js                             (Express server tier — single file)    [server.js:L1-L71]
+├── .vscode/
+│   ├── extensions.json                   (recommended VS Code extensions)
+│   └── settings.json                     (workspace formatting preferences)
+├── public/                               (SPA shell, served verbatim by react-scripts)
+│   ├── index.html                        (root mount node, SEO/PWA meta)
+│   ├── manifest.json                     (PWA install metadata)
+│   └── robots.txt                        (crawler policy)
+├── scripts/                              (POSIX sh operational entrypoints)
+│   ├── deliver-for-development.sh        (calls npm run build)
+│   ├── deploy-for-production.sh          (build + install --production + node server.js & + .pidfile)
+│   ├── kill.sh                           (kills .pidfile process and stray npm processes)
+│   └── test.sh                           (instructional test wrapper, mostly disabled)
+├── src/                                  (React 18.3.1 client tier)
+│   ├── App.js                            (BrowserRouter + 7 routes)              [src/App.js:L1-L34]
+│   ├── App.test.js                       (Jest smoke test for /weather/i text)
+│   ├── autoload.js                       (Bootstrap CSS/JS + project CSS imports)
+│   ├── index.js                          (ReactDOM.createRoot + StrictMode + SW register)
+│   ├── reportWebVitals.js                (web-vitals hook, currently dormant)
+│   ├── service-worker.js                 (Workbox precache + image runtime cache)
+│   ├── serviceWorkerRegistration.js      (production-only SW registration logic)
+│   ├── setupTests.js                     (@testing-library/jest-dom bootstrap)
+│   ├── apis/
+│   │   ├── getCurrentWeather.js          (OpenWeatherMap current + api-ninjas city)
+│   │   ├── getGeolocation.js             (navigator.geolocation watchPosition)
+│   │   └── getWeatherForecast.js         (OpenWeatherMap 5-day/3-hour forecast)
+│   ├── assets/
+│   │   ├── humidity.svg, pressure.svg, wind.svg
+│   │   └── static/                       (additional weather-condition artwork)
+│   ├── backend/                          (browser-side persistence)
+│   │   ├── app_backend.js                (singleton db = new Database())
+│   │   ├── database.js                   (Database CRUD wrapper over localStorage)
+│   │   └── settings.js                   (settings UI handlers)
+│   ├── components/                       (reusable presentational components)
+│   │   ├── button.jsx, footer.jsx, footerNav.jsx
+│   │   ├── forecastWeatherComponent.jsx, forecastWeatherItems.jsx
+│   │   ├── futureWeatherComponent.jsx, nextWeekComponent.jsx
+│   │   ├── spinner.jsx
+│   │   └── utilityFooterComponet.jsx     (note: project-local spelling preserved)
+│   ├── inc/
+│   │   ├── scripts/
+│   │   │   ├── script.js                 (DOM-ready spinner hide)
+│   │   │   └── utilities.js              (navigate, getCurrentDate, time helpers)
+│   │   └── styles/
+│   │       ├── style.css                 (poppins fonts, brand tokens, layout)
+│   │       ├── overScrollStyles.css      (WebKit scrollbar hide)
+│   │       └── three-dots.css            (vendored loader animations, MIT)
+│   └── pages/                            (route-level screens)
+│       ├── 404.jsx, ForecastWeather.jsx, Home.jsx, Settings.jsx
+│       ├── Support.jsx, Weather.jsx, WeatherMain.jsx
+└── blitzy/
+    └── documentation/
+        ├── Project Guide.md
+        └── Technical Specifications.md
 ```
 
-### 0.11.6 Attachments and External Metadata
+The above tree is **fully UNCHANGED**. No files are extracted, consolidated, abstracted, renamed, moved, or split.
 
-| Type | Item | Description |
-|------|------|-------------|
-| User Input | Original request | "Add health_check endpoint to verify service is running correctly" |
-| Figma URLs | None provided | N/A |
-| File Attachments | None provided | N/A |
-| Environment Variables | None specified | N/A |
-| Secrets | None specified | N/A |
+### 0.3.3 Web Search Research Conducted
 
+No web searches were conducted for this iteration. The conditions that would normally trigger research — a named refactoring pattern (e.g., "best practices for hexagonal architecture migration"), a named language/framework convention (e.g., "Vite migration guide for CRA"), a named tooling target (e.g., "AST-grep rules for jQuery removal") — are absent from the user prompt. Conducting speculative research would risk anchoring downstream code generation on goals the user did not request.
+
+If a future clarified directive arrives, candidate research topics that would become relevant include (this list is illustrative only and is **not** a commitment):
+
+- Best practices for the named refactoring pattern (e.g., extract-class, replace-conditional-with-polymorphism)
+- Migration tooling for the named transformation (e.g., codemods, jscodeshift recipes, ts-migrate)
+- Conventions for the named target framework (e.g., Vite, Next.js, TypeScript strict mode)
+- Tools for safe refactoring (e.g., comby, ast-grep, ESLint custom rules)
+
+### 0.3.4 Design Pattern Applications
+
+No design patterns are proposed for application in this iteration because no transformation is requested. For factual context only, the existing codebase already exhibits the following patterns:
+
+| Existing Pattern | Where Located | Evidence |
+|------------------|---------------|----------|
+| Singleton (mutable for testability) | `src/backend/app_backend.js` exports `let db = new Database()` | [observed via folder summary; src/backend/app_backend.js] |
+| Storage wrapper / facade | `Database` class wrapping `localStorage` CRUD | [src/backend/database.js:L1-L40] |
+| Module bifurcation | CommonJS `require` in `server.js`; ESM `import` in `src/**/*.{js,jsx}` | [server.js:L3-L4] vs [src/App.js:L1-L10] |
+| Production-gated PWA | `serviceWorkerRegistration.js` registers only when `NODE_ENV === 'production'` | [referenced in 5.1.1.2] |
+| Graceful shutdown | `SIGTERM`/`SIGINT` traps + uncaughtException/unhandledRejection in `server.js` | [server.js:L60-L70] |
+
+These patterns are observations of the current state, not refactoring proposals.
+
+### 0.3.5 User Interface Design
+
+No UI design changes are requested. The user prompt names no screen, no flow, no component, no Figma frame, and no visual deliverable. The seven existing routes (`/`, `/support`, `/weather`, `/weathermain`, `/forecast`, `/settings`, and the `*` catch-all) [src/App.js:L21-L29] continue to be served exactly as they are.
+
+## 0.4 Transformation Mapping
+
+### 0.4.1 File-by-File Transformation Plan
+
+No file-by-file transformation is authorized for this iteration because the user prompt does not authorize any UPDATE, CREATE, or REFERENCE actions against specific paths. The transformation table is therefore explicitly empty:
+
+| Target File | Transformation | Source File | Key Changes |
+|------------|----------------|-------------|-------------|
+| — | — | — | No file transformations are requested. The user prompt did not name a source artifact, target architecture, or any files to modify, create, or reference. |
+
+This empty table is intentional and must not be filled in by downstream code generation without a clarified directive. Any file appearing in Section 0.2.3 ("Explicitly Out of Scope") remains untouched.
+
+### 0.4.2 Cross-File Dependencies
+
+No import statement updates, configuration updates, or test file import corrections are requested. The cross-file dependency graph of the existing system remains intact:
+
+- **CommonJS in server.js** [server.js:L3-L4] — `const express = require('express')` and `const path = require('path')` remain as-is.
+- **ES Modules in src/** — every `import` statement under `src/` remains as-is.
+- **Re-export of singleton db** — `src/backend/app_backend.js` continues to be the single source of `db` consumed by `src/App.js` [src/App.js:L9], `src/apis/*.js`, `src/backend/settings.js`, and the page modules.
+- **Bootstrap and project CSS injection** — `src/autoload.js` continues to be the single point of CSS/JS asset loading; no consumers' import paths change.
+
+### 0.4.3 Wildcard Patterns
+
+No wildcard patterns are used in this iteration because no patterned transformation is requested. If a clarified directive arrives in a future iteration, only **trailing** wildcard patterns will be permitted (per the prompt convention — e.g., `src/apis/*.js | UPDATE`, never `**/apis/*.js`).
+
+### 0.4.4 One-Phase Execution
+
+The one-phase execution principle is restated here so it remains visible to future iterations: when a clarified refactoring directive is provided, the entire refactor will be executed by Blitzy in **one phase**. The project will never be split across multiple temporal phases. All in-scope files will be addressed together in a single coordinated change set.
+
+For the current iteration, the one-phase principle is moot because the change set is empty.
+
+## 0.5 Dependency Inventory
+
+### 0.5.1 Dependency Change Summary
+
+No dependency additions, removals, or version changes are requested by the user prompt. The Blitzy platform will not introduce, retire, or bump any package in this iteration.
+
+### 0.5.2 Existing Dependency Baseline
+
+The following table is the baseline inventory drawn from `package.json` [package.json:L5-L25]. It is **reference material only** — every entry is unchanged in this iteration. Versions are reproduced exactly as pinned in the manifest, including the leading `^` semver caret where present:
+
+| Registry | Package Name | Version (as pinned) | Purpose / Tier |
+|----------|--------------|---------------------|----------------|
+| npm | `react` | `^18.3.1` | Client tier — UI library [package.json:L18] |
+| npm | `react-dom` | `^18.3.1` | Client tier — DOM renderer [package.json:L19] |
+| npm | `react-router-dom` | `^6.22.3` | Client tier — routing [package.json:L20] |
+| npm | `react-scripts` | `5.0.1` | Build pipeline — Create React App toolchain [package.json:L21] |
+| npm | `express` | `^4.21.2` | Server tier — HTTP framework [package.json:L13] |
+| npm | `bootstrap` | `^5.3.6` | Client tier — utility CSS [package.json:L11] |
+| npm | `bootstrap5` | `^1.1.9` | Client tier — auxiliary Bootstrap helpers [package.json:L12] |
+| npm | `jquery` | `^3.7.1` | Client tier — DOM manipulation and AJAX [package.json:L16] |
+| npm | `jquery-mobile` | `^1.5.0-alpha.1` | Client tier — auxiliary jQuery Mobile [package.json:L17] |
+| npm | `framer-motion` | `^8.5.5` | Client tier — animation [package.json:L14] |
+| npm | `sweetalert2` | `^11.12.1` | Client tier — modal/toast UI [package.json:L23] |
+| npm | `animate.css` | `^4.1.1` | Client tier — CSS animations [package.json:L9] |
+| npm | `aos` | `^2.3.4` | Client tier — Animate-On-Scroll [package.json:L10] |
+| npm | `react-swipeable` | `^7.0.2` | Client tier — touch gestures [package.json:L22] |
+| npm | `web-vitals` | `^2.1.4` | Client tier — performance telemetry (currently dormant) [package.json:L24] |
+| npm | `grunt` | `^1.6.1` | Build/operations — task runner [package.json:L15] |
+| npm | `@testing-library/jest-dom` | `^6.6.3` | Test tier — Jest DOM matchers [package.json:L6] |
+| npm | `@testing-library/react` | `^16.3.0` | Test tier — React testing utilities [package.json:L7] |
+| npm | `@testing-library/user-event` | `^14.0.0` | Test tier — user event simulation [package.json:L8] |
+
+Notes on the baseline (observations, not changes):
+
+- The manifest declares no `engines` field. Node.js compatibility is documented in `Project Guide.md` as v14.x minimum, v18.x or v20.x recommended [referenced in 3.1.1].
+- Express is intentionally pinned to the 4.x line. RULE-006 from the existing tech spec requires Express 4.21.x (not 5.x) [referenced in 5.1.1.2]; this rule is preserved.
+- `react-scripts` is at `5.0.1` (not caret-prefixed), pinning the build pipeline exactly [package.json:L21].
+
+### 0.5.3 Import Refactoring
+
+No import refactoring is requested. The existing import graph is preserved verbatim. No file matching `src/**/*.{js,jsx}`, `tests/**/*.{js,jsx}`, or `scripts/**/*` will have its import statements modified in this iteration.
+
+### 0.5.4 External Reference Updates
+
+No configuration files, documentation files, build files, or CI/CD files require reference updates. Specifically:
+
+- `**/*.config.*`, `**/*.json` — unchanged
+- `**/*.md` (including `README.md` and `blitzy/documentation/*.md`) — unchanged
+- Build files (`package.json`, `package-lock.json`) — unchanged
+- CI/CD: a `Jenkinsfile` exists per the tech spec [referenced in 3.1.3] but is not modified in this iteration; no `.github/workflows/` or `.gitlab-ci.yml` exists in the repository
+
+## 0.6 Special Analysis
+
+### 0.6.1 Analysis Determination
+
+No special analysis is required by the user prompt. The user has not directed Blitzy to investigate cross-cutting classes, dependency removal techniques, or any other deep technical concern. This sub-section is therefore a brief and honest report rather than a substantive deep dive.
+
+### 0.6.2 Candidate Analyses for Future Directives (Reference Only)
+
+The following list is illustrative only. None of these analyses is being conducted in this iteration. They are recorded so that the Blitzy platform can quickly recognize the kind of cross-cutting question a future directive might require, and so that a clarified prompt can reference them by name without ambiguity:
+
+- **jQuery removal cross-cut**: `jquery` is consumed across at least four surfaces of the client tier — `src/apis/getCurrentWeather.js` (DOM mutations and AJAX), `src/apis/getGeolocation.js` (`$.noConflict()` and AJAX), `src/backend/settings.js` (form reads), `src/components/utilityFooterComponet.jsx` (class toggles on `.cmp` and `.utility-component`), `src/inc/scripts/utilities.js` (DOM-ready and helpers), and `src/inc/scripts/script.js` (spinner hide on DOM-ready) [evidence assembled from folder summaries of `src/apis`, `src/backend`, `src/components`, and `src/inc/scripts`]. A jQuery-removal directive would require cataloguing every call site and replacing each with React state, refs, or `fetch`.
+- **CommonJS-to-ESM server migration**: `server.js` uses `require` [server.js:L3-L4]. A migration to ESM would require either renaming to `server.mjs` or adding `"type": "module"` to `package.json` (which would in turn affect any other `.js` file expected to be CommonJS).
+- **Bootstrap-to-Tailwind migration**: Bootstrap utility classes (`d-flex`, `align-items-*`, `justify-content-*`) are spread across the components and pages folders per the existing component-level summaries; replacing them with Tailwind utilities would touch every `*.jsx` file plus the autoload pipeline in `src/autoload.js`.
+- **CRA-to-Vite migration**: `react-scripts 5.0.1` would be retired in favor of `vite`, requiring new entry HTML wiring and adjusted `public/` semantics; `scripts/deploy-for-production.sh` and `scripts/deliver-for-development.sh` would need their `npm run build` step revalidated against the new build output directory.
+- **API-key extraction**: The hardcoded OpenWeatherMap API key in `src/apis/getCurrentWeather.js` is acknowledged technical debt per the existing architecture documentation [referenced in 5.1.2 — "API keys hardcoded — acknowledged technical debt"]. A directive could move it to runtime configuration, in which case the server tier may need to expose a config endpoint or the build step may need to inject `REACT_APP_*` env vars.
+- **Test-coverage uplift**: The only test today is the smoke test in `src/App.test.js` [referenced in 1.3 SCOPE evidentiary list] and `scripts/test.sh` documents but does not run a Jest suite. A coverage uplift directive would touch `setupTests.js`, add new `*.test.{js,jsx}` files alongside each `src/` module, and may enable the disabled commands in `scripts/test.sh`.
+
+Each bullet above is a problem statement, not a plan. None of them is in scope until the user supplies a clarified refactoring directive.
+
+## 0.7 Refactoring Rules and Constraints
+
+### 0.7.1 User-Specified Refactoring Rules
+
+The user-specified implementation rules list is empty (`[]`). No refactoring-specific rules have been issued for this iteration.
+
+### 0.7.2 Special Instructions and Constraints
+
+No special instructions, no migration requirements, no performance or scalability targets, no examples, and no web search requirements were provided. The user's prompt contains no directives of the kind that this section is designed to capture (e.g., "maintain all public interfaces", "preserve test coverage", "follow [pattern] X").
+
+### 0.7.3 Constraints Inherited From the Existing Technical Specification
+
+Although the user prompt issues no rules, the existing Technical Specification documents constraints (RULE-001 through RULE-008, referenced in 5.1.1.2) that govern any change to this codebase. The Blitzy platform records them here so that any future clarified directive must reckon with them. These constraints are NOT new for this iteration; they are repeated from existing documentation and remain in force by default until a future user prompt explicitly relaxes one of them:
+
+- **RULE-006 (Express major version pin)**: Express must remain on the 4.21.x line; do not introduce Express 5.x. [referenced in 5.1.1.2]
+- **RULE-007 (Frontend immutability during server-tier work)**: When the work in scope is operational/server-tier, frontend source code must not be modified. This rule was authored in the context of the recent `/health` feature addition and may not apply to a future directive that explicitly targets the frontend; the user prompt should clarify scope. [referenced in 1.1.1 and 3.1.1]
+- **No TypeScript adoption**: The existing specification disallows TypeScript and requires new code to "match existing JavaScript codebase." [referenced in 3.1.1]
+- **No CRA ejection**: Create React App customization through ejection is out of scope by the existing specification. [referenced in 1.3.2.1]
+- **Hardcoded OpenWeatherMap API key (acknowledged debt)**: The key in `src/apis/getCurrentWeather.js` remains in place; rotation is explicitly out of scope unless a directive mandates extraction. [referenced in 1.3.2.1]
+- **localStorage schema preservation**: All `localStorage` keys in the `weather-app` namespace (e.g., `HOME_PAGE_SEEN`, `USER_DEFAULT_LOCATION`, `WEATHER_UNIT`, `TRACK_SAVED_LOCATION_WEATHER`) retain their current names and value semantics. [referenced in 1.3.2.1]
+
+### 0.7.4 Behavioral Invariants to Preserve
+
+Even with no directive, the following user-facing and operator-facing contracts MUST be preserved by any downstream code generation that may run for this iteration. Because no transformation is authorized, preservation is automatic; the contracts are listed for completeness and for future reference:
+
+- **`GET /health` JSON contract** — must return `{status, uptime, timestamp}` with HTTP 200 on success and `{status:"error", message:"Health check failed", timestamp}` with HTTP 503 on failure [server.js:L16-L30, README.md:L48-L60].
+- **SPA fallback routing** — wildcard `app.get('*')` continues to serve `build/index.html` [server.js:L38-L48].
+- **Static asset cache headers** — `maxAge: '1d'`, `etag: true`, `lastModified: true` [server.js:L32-L36].
+- **Graceful shutdown** — `SIGTERM` and `SIGINT` traps continue to call `gracefulShutdown` [server.js:L60-L61].
+- **Routing map** — the seven routes declared in `src/App.js` [src/App.js:L21-L29] remain unchanged.
+- **Onboarding gate** — `db.get("HOME_PAGE_SEEN")` continues to choose between `<Home />` and `<WeatherApp />` for the index route [src/App.js:L13-L17].
+- **PWA registration gating** — service worker registers only in production [referenced in 5.1.1.2].
+
+## 0.8 References and Search Log
+
+### 0.8.1 Citation Discipline Statement
+
+Every claim in this Agent Action Plan about the existing system is grounded by an inline `[<path>:<locator>]` citation immediately following the claim. Where a claim could not be tied to a specific source location (for example, statements describing the absence of a feature in the user prompt itself), the claim is grounded against the user prompt's verbatim text reproduced in Section 0.1.1 rather than against the codebase. No `[inferred — no direct source]` markers were necessary because every codebase-level claim in this AAP can be tied to a retrieved file or to an existing tech spec section.
+
+### 0.8.2 Search Log
+
+The following enumerates every retrieval performed during the authoring of this Agent Action Plan. It is provided for downstream verification and to aid any follow-up iteration:
+
+#### 0.8.2.1 Folder Inspections (deep search)
+
+| # | Folder Path | Tool | Purpose |
+|---|-------------|------|---------|
+| 1 | `` (root) | get_source_folder_contents | Establish repository topology |
+| 2 | `src` | get_source_folder_contents | Identify client tier composition |
+| 3 | `src/apis` | get_source_folder_contents | Catalog external API integration modules |
+| 4 | `src/backend` | get_source_folder_contents | Catalog persistence-layer modules |
+| 5 | `src/components` | get_source_folder_contents | Catalog reusable presentational components |
+| 6 | `src/inc` | get_source_folder_contents | Catalog shared scripts and styles |
+| 7 | `src/pages` | get_source_folder_contents | Catalog route-level page components |
+| 8 | `public` | get_source_folder_contents | Catalog SPA shell and PWA assets |
+| 9 | `scripts` | get_source_folder_contents | Catalog operational shell scripts |
+| 10 | `blitzy` | get_source_folder_contents | Locate documentation hub |
+
+#### 0.8.2.2 File Reads
+
+| # | File Path | Tool | Purpose |
+|---|-----------|------|---------|
+| 1 | `README.md` | read_file | Confirm `/health` contract and project description |
+| 2 | `package.json` | read_file | Inventory dependencies and scripts |
+| 3 | `server.js` | read_file | Confirm `/health` route, static serving, SPA fallback, shutdown handlers |
+| 4 | `src/App.js` | read_file | Confirm route declarations and onboarding gate |
+
+#### 0.8.2.3 Broad Searches
+
+| # | Query | Tool | Outcome |
+|---|-------|------|---------|
+| 1 | "blitzyignore configuration file specifying paths to exclude from analysis" | search_files | No `.blitzyignore` files found |
+
+#### 0.8.2.4 Tech Spec Section Retrievals
+
+| # | Section Heading | Purpose |
+|---|------------------|---------|
+| 1 | 1.1 EXECUTIVE SUMMARY | Project context and recent feature classification |
+| 2 | 1.3 SCOPE | Existing in-scope/out-of-scope inventory and references |
+| 3 | 5.1 HIGH-LEVEL ARCHITECTURE | Tier topology, principles, integration points, data flows |
+| 4 | 3.1 PROGRAMMING LANGUAGES | Module-system bifurcation and version constraints |
+
+### 0.8.3 Attachments Inventory
+
+| Attachment Filename | Description |
+|---------------------|-------------|
+| — | None. The user provided 0 attachments. |
+
+### 0.8.4 Figma Frames Inventory
+
+| Frame Name | URL | Description |
+|------------|-----|-------------|
+| — | — | None. The user provided 0 Figma frames. |
+
+### 0.8.5 External URLs Referenced
+
+| URL | Source | Purpose |
+|-----|--------|---------|
+| — | — | No external URLs were retrieved. The user prompt named none, and no web search was conducted (Section 0.3.3). |
+
+### 0.8.6 Source Inventory by Citation Locator
+
+For convenience, the locator anchors used in inline `[<path>:<locator>]` citations across this Agent Action Plan are summarized below so that downstream verification can be performed quickly:
+
+| Locator | What It Anchors |
+|---------|-----------------|
+| `[server.js:L1-L71]` | Express server tier — health endpoint, static serving, SPA fallback, shutdown handlers |
+| `[server.js:L16-L30]` | `/health` route handler with try/catch and 200/503 contract |
+| `[server.js:L32-L36]` | `express.static` middleware with cache headers |
+| `[server.js:L38-L48]` | Wildcard SPA fallback handler |
+| `[server.js:L60-L61]` | `SIGTERM`/`SIGINT` traps |
+| `[package.json:L1-L51]` | Full npm manifest |
+| `[package.json:L5-L25]` | `dependencies` block |
+| `[README.md:L1-L80]` | Project overview and `/health` documentation |
+| `[README.md:L25-L60]` | `/health` endpoint contract |
+| `[src/App.js:L1-L34]` | Router composition and onboarding gate |
+| `[src/App.js:L9]` | `db` import from `./backend/app_backend` |
+| `[src/App.js:L13-L17]` | `HOME_PAGE_SEEN` conditional default route |
+| `[src/App.js:L21-L29]` | Routes declarations for the seven app paths |
+| `[src/backend/database.js:L1-L40]` | `Database` CRUD wrapper over `localStorage` |
 
